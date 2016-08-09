@@ -36,6 +36,10 @@ class Show(db.Model):
                        autoincrement=True)
     title = db.Column(db.Unicode(100),
                       nullable=False)
+    imdb_id = db.Column(db.String(20),
+                        nullable=False)
+    first_aired = db.Column(db.DateTime,
+                            nullable=True)
     description = db.Column(db.UnicodeText,
                             nullable=True)
     seasons = db.Column(db.String(20),
@@ -84,9 +88,9 @@ class Cable(db.Model):
     show_id = db.Column(db.Integer,
                         db.ForeignKey('shows.show_id'),
                         nullable=False)
-    date = db.Column(db.Datetime,
+    date = db.Column(db.DateTime,
                      nullable=False)
-    time = db.Column(db.Datetime,
+    time = db.Column(db.DateTime,
                      nullable=False)
     network = db.Column(db.String(50),
                         nullable=False)
