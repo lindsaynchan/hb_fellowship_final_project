@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Search{% endblock %}
+
+{% block content %}
+
+{% for result in results %}
+    <ul>
+        <li><a href="/show/{{ result["id"] }}">{{ result["title"] }}</a> ({{ result["first_aired"][0:4] }})</li>
+    </ul>        
+{% endfor %}
+
+{% endblock %}

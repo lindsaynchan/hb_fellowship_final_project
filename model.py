@@ -29,33 +29,23 @@ class User(db.Model):
 class Show(db.Model):
     """Creating TV shows table."""
 
-    __table__ = "shows"
+    __tablename__ = "shows"
 
     show_id = db.Column(db.Integer, 
                        primary_key=True,
                        autoincrement=True)
     title = db.Column(db.Unicode(100),
                       nullable=False)
-    imdb_id = db.Column(db.String(20),
+    guidebox_id = db.Column(db.String(20),
                         nullable=False)
-    first_aired = db.Column(db.DateTime,
+    first_aired = db.Column(db.Date,
                             nullable=True)
+    network = db.Column(db.String(20),
+                        nullable=True)
     description = db.Column(db.UnicodeText,
                             nullable=True)
     seasons = db.Column(db.String(20),
                         nullable=True)
-
-
-class Service(db.Model):
-    """Creating streaming services table."""
-
-    __tablename__ = "services"
-
-    service_id = db.Column(db.Integer, 
-                           primary_key=True,
-                           autoincrement=True)
-    name = db.Column(db.String(50),
-                     nullable=False)
 
 
 class Favorite(db.Model):
@@ -77,12 +67,29 @@ class Favorite(db.Model):
     user = db.relationship("User", backref="favorites")
 
 
-class Cable(db.Model):
+class Network(db.Model):
+    """Creating networks table."""
+
+    __tablename__ = "networks"
+
+    network_id = db.Column(db.Integer, 
+                           primary_key=True,
+                           autoincrement=True)
+    #channel
+    channel = db.Column(db.String(20),
+                        nullable=False)
+    #callSign
+    network_name = db.Column(db.String(50),
+                             nullable=True)
+
+
+
+class CableListing(db.Model):
     """Creating cable service listings table."""
 
-    __tablename__ = "cables"
+    __tablename__ = "cable_listings"
 
-    cable_id = db.Column(db.Integer, 
+    cable_listing_id = db.Column(db.Integer, 
                          primary_key=True,
                          autoincrement=True)
     show_id = db.Column(db.Integer,
@@ -92,10 +99,24 @@ class Cable(db.Model):
                      nullable=False)
     time = db.Column(db.DateTime,
                      nullable=False)
-    network = db.Column(db.String(50),
+    network_id = db.Column(db.String(50),
+                        db.ForeignKey('networks.network_id'),
                         nullable=False)
 
-    show = db.relationship("Show", backref="cables")
+    show = db.relationship("Show", backref="cable_listings")
+    network = db.relationship("Network", backref="cable_listings")
+
+
+class StreamingService(db.Model):
+    """Creating streaming services table."""
+
+    __tablename__ = "streaming_services"
+
+    streaming_service_id = db.Column(db.Integer, 
+                           primary_key=True,
+                           autoincrement=True)
+    name = db.Column(db.String(50),
+                     nullable=False)
 
 
 class Streaming(db.Model):
@@ -110,7 +131,7 @@ class Streaming(db.Model):
                         db.ForeignKey('shows.show_id'),
                         nullable=False)
     service_id = db.Column(db.Integer, 
-                           db.ForeignKey('services.service_id'),
+                           db.ForeignKey('streaming_services.service_id'),
                            nullable=False)
 
     show = db.relationship("Show", backref="streamings")
@@ -118,13 +139,6 @@ class Streaming(db.Model):
 
 ##################################################################
 
-def init_app():
-    # So that we can use Flask-SQLAlchemy, we'll make a Flask app
-    from flask import Flask
-    app = Flask(__name__)
-
-    connect_to_db(app)
-    print "Connected to DB."
 
 def connect_to_db(app):
     """Connect the database to our Flask app."""
@@ -133,6 +147,7 @@ def connect_to_db(app):
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///television'
     db.app = app
     db.init_app(app)
+
 
 
 if __name__ == "__main__":
