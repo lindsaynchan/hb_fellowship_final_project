@@ -4,8 +4,8 @@ import os
 from jinja2 import StrictUndefined
 from flask import Flask, render_template, request, flash, redirect, session
 from model import connect_to_db, db, User, Show, StreamingService, Favorite, CableListing, Streaming, Network
-from urllib import urlencode
 import requests
+import urllib2
 
 GUIDEBOX_BASE_URL = "http://api-public.guidebox.com/v1.43/US/"
 
@@ -36,17 +36,16 @@ def show_results():
     search = request.args.get("search")
     #turn unicode in string
     search = str(search)
-    #triple url code search
-        # encoded_search = urlencode(search)
-        # print encoded_search
-    #turn unicode into string
-    #create Guidebox API url
-        # url = GUIDEBOX_BASE_URL + GUIDEBOX_API_KEY + "/search/title/" + encoded_search
+    #encode search
+    encoded_search = urllib2.quote(search)
 
-    url = GUIDEBOX_BASE_URL + GUIDEBOX_API_KEY + "/search/title/Arrested"
+    #create Guidebox API url
+    url = GUIDEBOX_BASE_URL + GUIDEBOX_API_KEY + "/search/title/" + encoded_search
+
 
     #submit API request
     response = requests.get(url)
+    #close request
     response.close()
     #save request as a json object
     response = response.json()
@@ -60,10 +59,54 @@ def show_results():
 def series_information(guidebox_id):
     """Show page."""
 
-    #using title to get API information from Guidebox
+    #using guidebox_id to get API information from Guidebox
+
+    #{Base API URL} /show/ {id} - title, guidebox_id, first_aired, network, overview
+    show_id_url = GUIDEBOX_BASE_URL + GUIDEBOX_API_KEY + "/show/" + guidebox_id
+
+    #submit API request
+    show_id_response = requests.get(show_id_url)
+    #close request
+    show_id_response.close()
+    #save request as a json object
+    show_info = show_id_response.json()
 
 
-    return render_template("show_page.html")
+    #{Base API URL} /show/ {id} /seasons - season # and first airdate (get year)
+    seasons_url = GUIDEBOX_BASE_URL + GUIDEBOX_API_KEY + "/show/" + guidebox_id + "/seasons"
+
+    #submit API request
+    seasons_response = requests.get(seasons_url)
+    #close request
+    seasons_response.close()
+    #save request as a json object
+    seasons_response = seasons_response.json()
+    #save seasons_results as a variable to pass through jinja
+    seasons_results = seasons_response["results"]
+
+    #{Base API URL} /show/ {id} /available_content - get streaming sources
+
+    streaming_sources_url = GUIDEBOX_BASE_URL + GUIDEBOX_API_KEY + "/show/" + guidebox_id + "/available_content"
+
+    #submit API request
+    streaming_sources_response = requests.get(streaming_sources_url)
+    #close request
+    streaming_sources_response.close()
+    #save request as a json object
+    streaming_sources_response = streaming_sources_response.json()
+
+    #format response to only get web episodes 
+    all_streaming_sources = streaming_sources_response["results"]["web"]["episodes"]["all_sources"]
+
+    #get title for OnConnect API call
+    #format the OnConnect API call to get series_id
+    #save series id to variable
+    #format the OnConnect API call to get schedule data
+
+    return render_template("show_page.html",
+                            show_info=show_info, 
+                            seasons_results=seasons_results,
+                            all_streaming_sources=all_streaming_sources)
 
 # @app.route('/user/<user_id>')
 # def index(user_id):

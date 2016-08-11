@@ -9,21 +9,6 @@
     <input type="submit" value="Search!">
 </form>
 
-<script>
-    
-    function encodeSearch(evt) {
-        debugger;
-        evt.preventDefault();
-        var uri = $("#search_input").val();
-        var res = encodeURI(uri);
-        console.log(res);
-    }
-
-    $("#search_input").on("submit", encodeSearch);
-
-
-</script>
-
 {% endblock %}
 
 

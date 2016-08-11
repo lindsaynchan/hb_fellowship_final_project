@@ -3,6 +3,32 @@
 {% block title %}Series!{% endblock %}
 
 {% block content %}
-<h1>HELLO!!</h1>
+
+<h1>{{ show_info["title"] }}</h1>
+<div><img src="{{ show_info["artwork_208x117"] }}"</div>
+<p id="first-aired">First Aired: {{ show_info["first_aired"][0:4] }}</p>
+<p id="network">Network: {{ show_info["network"] }}</p>
+<p id="description">Description: {{ show_info["overview"] }}</p>
+<p>
+    <h3>Seasons</h3>
+    {% for season in seasons_results %}
+        <ul>
+            <li>Season {{ season["season_number"] }} 
+                ({% if season["first_airdate"] %} 
+                    {{ season["first_airdate"][0:4] }}
+                {% else %}
+                    N/A
+                {% endif %})</li>
+        </ul>
+    {% endfor %}
+</p>
+<p>
+    <h3>Available Online</h3>
+    {% for source in all_streaming_sources %}
+        <ul>
+            <li>{{ source["display_name"] }}</li>
+        </ul>
+    {% endfor %}
+</p>
 
 {% endblock %}
