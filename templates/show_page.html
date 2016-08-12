@@ -30,5 +30,21 @@
         </ul>
     {% endfor %}
 </p>
+<p>
+    <h3>Where to Watch on Cable TV</h3>
+    {% if airings %}
+        {% for airing in airings %}
+            <ul>
+                <li>{{ airing["program"]["title"] }}: {{ airing["program"]["episodeTitle"] }}</li>
+                <li>Season: {{ airing["program"]["seasonNum"] }} Episode: {{ airing["program"]["episodeNum"] }}</li>
+                <li>{{ airing["station"]["callSign"] }}</li>
+                <li>{{ airing["startTime"] }}</li>
+            </ul>
+        {% endfor %}
+    {% else %}
+        <p>Currently there are no upcoming airings of {{ show_info["title"] }}.</p>
+    {% endif %}
+</p>
+
 
 {% endblock %}

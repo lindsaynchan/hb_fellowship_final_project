@@ -69,7 +69,8 @@ def series_information(guidebox_id):
     return render_template("show_page.html",
                             show_info=show_info, 
                             seasons_results=seasons_results,
-                            all_streaming_sources=all_streaming_sources)
+                            all_streaming_sources=all_streaming_sources,
+                            airings=airings)
 
 # @app.route('/user/<user_id>')
 # def index(user_id):
