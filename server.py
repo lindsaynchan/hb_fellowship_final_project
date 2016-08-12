@@ -4,6 +4,8 @@ import os
 from jinja2 import StrictUndefined
 from flask import Flask, render_template, request, flash, redirect, session
 from model import connect_to_db, db, User, Show, StreamingService, Favorite, CableListing, Streaming, Network
+from guidebox import guidebox_search_title, guidebox_show_info, guidebox_season_info, guidebox_streaming_sources_info
+from onconnect import onconnect_search_series_id, onconnect_search_airings
 import requests
 import urllib2
 
@@ -39,69 +41,30 @@ def show_results():
     #encode search
     encoded_search = urllib2.quote(search)
 
-    #create Guidebox API url
-    url = GUIDEBOX_BASE_URL + GUIDEBOX_API_KEY + "/search/title/" + encoded_search
-
-
-    #submit API request
-    response = requests.get(url)
-    #close request
-    response.close()
-    #save request as a json object
-    response = response.json()
-
-    #saving just the results of the search to a variable to pass to jinja
-    results = response["results"]
+    results = guidebox_search_title(encoded_search)
 
     return render_template("search_results.html", results=results)
 
 @app.route('/show/<guidebox_id>')
 def series_information(guidebox_id):
-    """Show page."""
+    """Show page containing basic information about the series and where a user can watch the series online and on cable TV."""
 
-    #using guidebox_id to get API information from Guidebox
+    #gathering information regarding the show
+    show_info = guidebox_show_info(guidebox_id)
 
-    #{Base API URL} /show/ {id} - title, guidebox_id, first_aired, network, overview
-    show_id_url = GUIDEBOX_BASE_URL + GUIDEBOX_API_KEY + "/show/" + guidebox_id
+    #gathering information about the show's seasons
+    seasons_results = guidebox_season_info(guidebox_id)
 
-    #submit API request
-    show_id_response = requests.get(show_id_url)
-    #close request
-    show_id_response.close()
-    #save request as a json object
-    show_info = show_id_response.json()
+    #gathering information about where the show's available online
+    all_streaming_sources = guidebox_streaming_sources_info(guidebox_id)
 
+    #get show title from Guidebox so it can be used in the OnConnect title search url 
+    show_title = str(show_info["title"])
 
-    #{Base API URL} /show/ {id} /seasons - season # and first airdate (get year)
-    seasons_url = GUIDEBOX_BASE_URL + GUIDEBOX_API_KEY + "/show/" + guidebox_id + "/seasons"
+    #obtaining the OnConnect seriesId that will be used in the OnConnect series airings url
+    series_id = onconnect_search_series_id(show_title)
 
-    #submit API request
-    seasons_response = requests.get(seasons_url)
-    #close request
-    seasons_response.close()
-    #save request as a json object
-    seasons_response = seasons_response.json()
-    #save seasons_results as a variable to pass through jinja
-    seasons_results = seasons_response["results"]
-
-    #{Base API URL} /show/ {id} /available_content - get streaming sources
-
-    streaming_sources_url = GUIDEBOX_BASE_URL + GUIDEBOX_API_KEY + "/show/" + guidebox_id + "/available_content"
-
-    #submit API request
-    streaming_sources_response = requests.get(streaming_sources_url)
-    #close request
-    streaming_sources_response.close()
-    #save request as a json object
-    streaming_sources_response = streaming_sources_response.json()
-
-    #format response to only get web episodes 
-    all_streaming_sources = streaming_sources_response["results"]["web"]["episodes"]["all_sources"]
-
-    #get title for OnConnect API call
-    #format the OnConnect API call to get series_id
-    #save series id to variable
-    #format the OnConnect API call to get schedule data
+    airings = onconnect_search_airings(series_id)
 
     return render_template("show_page.html",
                             show_info=show_info, 
