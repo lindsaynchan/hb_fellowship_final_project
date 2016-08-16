@@ -8,6 +8,8 @@ from guidebox import guidebox_search_title, guidebox_show_info, guidebox_season_
 from onconnect import onconnect_search_series_id, onconnect_search_airings
 import requests
 import urllib2
+import arrow
+
 
 GUIDEBOX_BASE_URL = "http://api-public.guidebox.com/v1.43/US/"
 
@@ -21,15 +23,43 @@ app.jinja_env.undefined = StrictUndefined
 
 ##########################################################################
 
-#creating homepage route to return homepage.html
+
 @app.route('/')
 def show_index():
     """Homepage."""
 
     return render_template("homepage.html")
 
-#creating search results route that will show series results from Guidebox API 
-#call
+@app.route('/login')
+def show_login_page():
+    """Login page."""
+
+    return render_template("login.html")
+
+@app.route('/new-user')
+def show_new_user_page():
+    """Create new user page."""
+
+    email = request.args.get("email")
+    password = request.args.get("password")
+
+    db.session.execute("INSERT INTO users VALUES (email, password)")
+    db.session.commit()
+
+    return render_template("new_user.html")
+
+@app.route('/login-user')
+def login_user():
+    """Login user."""
+
+    email = request.args.get("email")
+    password = request.args.get("password")
+    session["user"] = email
+
+    print session
+
+    return redirect("/")
+
 @app.route('/search-results')
 def show_results():
     """Search results page."""
@@ -40,10 +70,11 @@ def show_results():
     search = str(search)
     #encode search
     encoded_search = urllib2.quote(search)
-
+    #API call using title of series, producing results that are close to the search 
     results = guidebox_search_title(encoded_search)
 
     return render_template("search_results.html", results=results)
+
 
 @app.route('/show/<guidebox_id>')
 def series_information(guidebox_id):
@@ -64,6 +95,7 @@ def series_information(guidebox_id):
     #obtaining the OnConnect seriesId that will be used in the OnConnect series airings url
     series_id = onconnect_search_series_id(show_title)
 
+    #obtaining listing information for a 24 hour period from the current time
     airings = onconnect_search_airings(series_id)
 
     return render_template("show_page.html",
@@ -72,11 +104,27 @@ def series_information(guidebox_id):
                             all_streaming_sources=all_streaming_sources,
                             airings=airings)
 
-# @app.route('/user/<user_id>')
-# def index(user_id):
-#     """Show user's profile."""
 
-#     return render_template("show_profile.html")
+@app.route('/save_to_favorites', methods=['POST'])
+def save_to_favorites_list():
+    """Save show to user's favorites list."""
+
+    #get show id from the event handler/post request
+    show_id = str(request.form.get("id"))
+
+    user_id = session["user"]
+
+    #add in row of favorites table using show id and user id
+    db.session.execute("INSERT INTO favorites VALUES (show_id,user_id)")
+    db.session.commit()
+
+    return show_id
+
+@app.route('/user/<user_id>')
+def show_user(user_id):
+    """Show user's profile."""
+
+    return render_template("user_profile.html")
 
 
 ##########################################################################

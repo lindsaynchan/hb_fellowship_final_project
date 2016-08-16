@@ -16,9 +16,6 @@ class User(db.Model):
     user_id = db.Column(db.Integer, 
                            primary_key=True,
                            autoincrement=True)
-    username = db.Column(db.String(20),
-                         unique=True,
-                         nullable=False)
     email = db.Column(db.String(64),
                       unique=True,
                       nullable=False)
@@ -56,8 +53,8 @@ class Favorite(db.Model):
     favorite_id = db.Column(db.Integer, 
                             primary_key=True,
                             autoincrement=True)
-    show_id = db.Column(db.Integer,
-                        db.ForeignKey('shows.show_id'),
+    guidebox_id = db.Column(db.Integer,
+                        db.ForeignKey('shows.guidebox_id'),
                         nullable=False)
     user_id = db.Column(db.Integer,
                         db.ForeignKey('users.user_id'),
