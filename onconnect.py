@@ -13,15 +13,15 @@ def onconnect_search_series_id(show_name):
     name = show_name.replace(" ", "+")
 
     #format OnConnect url
-    url = "http://data.tmsapi.com/v1.1/programs/search?limit=1&q=" + name + "&entityType=series&api_key=" + ONCONNECT_API_KEY
+    url = "http://data.tmsapi.com/v1.1/programs/search?limit=50&q=" + name + "&entityType=series&api_key=" + ONCONNECT_API_KEY
 
     #submit API request
     show_search_response = requests.get(url)
     #close request
 
     show_search_response.close()
-    #save request as a json object
 
+    #save request as a json object
     show_search_response = show_search_response.json()
 
     #get series_id and save as a variable
@@ -62,7 +62,8 @@ def onconnect_search_airings(onconnect_series_id):
         start_time = start_time.replace("T", "")
         start_time = start_time.replace("Z", "")
         arrow_time = arrow.get(start_time, 'YYYY-MM-DDHH:mm').replace(hours=-7)
-        arrow_time = arrow_time.format('HH:mm MM-DD-YYYY')
+        arrow_time = arrow_time.format('h:mma ddd MMM DD, YYYY')
+        #format a = am/pm, h = none army time for hours
         airing["startTime"] = arrow_time
 
     return airings_info

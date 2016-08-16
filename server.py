@@ -30,35 +30,88 @@ def show_index():
 
     return render_template("homepage.html")
 
+
 @app.route('/login')
 def show_login_page():
     """Login page."""
 
     return render_template("login.html")
 
-@app.route('/new-user')
-def show_new_user_page():
-    """Create new user page."""
-
-    email = request.args.get("email")
-    password = request.args.get("password")
-
-    db.session.execute("INSERT INTO users VALUES (email, password)")
-    db.session.commit()
-
-    return render_template("new_user.html")
 
 @app.route('/login-user')
 def login_user():
     """Login user."""
 
+    #get email and password from login form and save as variables
     email = request.args.get("email")
     password = request.args.get("password")
-    session["user"] = email
 
+    #run query to check if email and password is correct in the database
+    emails = User.query.filter(User.email==email, User.password==password).all()
+
+    #if email and password match what's in the system, add user to the session and redirect to homepage
+    if emails:
+        session["current_user"] = email
+        print session
+
+        flash("Logged in as %s." % email)
+
+        return redirect("/")
+    #if email and password does not match what's in the system, redirect to login
+    else:
+        flash("That email and password combination does not exist in the system.")
+        return redirect("/login")
+
+@app.route('/logout')
+def logout_user():
+    """Logout user."""
+
+    #remove user from the session
+    session.pop("current_user", None)
     print session
 
+    flash("Logged out.")
+
     return redirect("/")
+
+
+@app.route('/new-user')
+def show_new_user_page():
+    """Show new user form."""
+
+    return render_template("new_user.html")
+
+
+@app.route('/create-new-user')
+def create_new_user():
+    """Create new user."""
+
+    #get email and password from form and save as variables
+    email = request.args.get("email")
+    password = request.args.get("password")
+
+    #run query to check if email is already in the database
+    emails = User.query.filter(User.email==email).all()
+
+    #if it returns a row containing the email, redirect user to page again 
+    if emails:
+        flash("That email is already in the system.")
+        return redirect("/new-user")
+    #else add the new user information to the table
+    else:
+        user = User(email=email, password=password)
+        db.session.add(user)
+        db.session.commit()
+        print session
+        return redirect("/login")
+
+
+@app.route('/user-profile/<user_id>')
+def show_user_profile():
+    """Show user profile including favorites list."""
+
+    
+
 
 @app.route('/search-results')
 def show_results():

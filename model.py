@@ -28,13 +28,11 @@ class Show(db.Model):
 
     __tablename__ = "shows"
 
-    show_id = db.Column(db.Integer, 
-                       primary_key=True,
-                       autoincrement=True)
+
+    guidebox_id = db.Column(db.String(20),
+                        primary_key=True)
     title = db.Column(db.Unicode(100),
                       nullable=False)
-    guidebox_id = db.Column(db.String(20),
-                        nullable=False)
     first_aired = db.Column(db.Date,
                             nullable=True)
     network = db.Column(db.String(20),
@@ -53,7 +51,7 @@ class Favorite(db.Model):
     favorite_id = db.Column(db.Integer, 
                             primary_key=True,
                             autoincrement=True)
-    guidebox_id = db.Column(db.Integer,
+    guidebox_id = db.Column(db.String(20),
                         db.ForeignKey('shows.guidebox_id'),
                         nullable=False)
     user_id = db.Column(db.Integer,
@@ -89,14 +87,14 @@ class CableListing(db.Model):
     cable_listing_id = db.Column(db.Integer, 
                          primary_key=True,
                          autoincrement=True)
-    show_id = db.Column(db.Integer,
-                        db.ForeignKey('shows.show_id'),
+    guidebox_id = db.Column(db.String(20),
+                        db.ForeignKey('shows.guidebox_id'),
                         nullable=False)
     date = db.Column(db.DateTime,
                      nullable=False)
     time = db.Column(db.DateTime,
                      nullable=False)
-    network_id = db.Column(db.String(50),
+    network_id = db.Column(db.Integer,
                         db.ForeignKey('networks.network_id'),
                         nullable=False)
 
@@ -124,15 +122,15 @@ class Streaming(db.Model):
     streaming_id = db.Column(db.Integer,
                              primary_key=True,
                              autoincrement=True)
-    show_id = db.Column(db.Integer,
-                        db.ForeignKey('shows.show_id'),
+    guidebox_id = db.Column(db.String(20),
+                        db.ForeignKey('shows.guidebox_id'),
                         nullable=False)
     service_id = db.Column(db.Integer, 
-                           db.ForeignKey('streaming_services.service_id'),
+                           db.ForeignKey('streaming_services.streaming_service_id'),
                            nullable=False)
 
     show = db.relationship("Show", backref="streamings")
-    service = db.relationship("Service", backref="streamings")
+    service = db.relationship("StreamingService", backref="streamings")
 
 ##################################################################
 
@@ -142,16 +140,15 @@ def connect_to_db(app):
 
     # Configure to use our PostgreSQL database
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///television'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.app = app
     db.init_app(app)
 
 
 
 if __name__ == "__main__":
-    # As a convenience, if we run this module interactively, it will
-    # leave you in a state of being able to work with the database
-    # directly.
-
+    # able to work with the database directly.
     from server import app
     connect_to_db(app)
     print "Connected to DB."
+
