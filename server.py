@@ -106,11 +106,15 @@ def create_new_user():
         return redirect("/login")
 
 
-@app.route('/user-profile/<user_id>')
+@app.route('/user-profile')
 def show_user_profile():
     """Show user profile including favorites list."""
 
-    
+    email = session["current_user"]
+
+    user_id = db.session.query(User.favorites).filter(User.email==email).all()
+
+    return render_template("user_profile.html", user_id=user_id)
 
 
 @app.route('/search-results')
@@ -165,10 +169,13 @@ def save_to_favorites_list():
     #get show id from the event handler/post request
     show_id = str(request.form.get("id"))
 
-    user_id = session["user"]
+    user_email = session["current_user"]
+
+    user_id = db.session.query(User.user_id).filter(User.email==user_email).one()
 
     #add in row of favorites table using show id and user id
-    db.session.execute("INSERT INTO favorites VALUES (show_id,user_id)")
+    favorite = Favorite(guidebox_id=show_id, user_id=user_id)
+    db.session.add(favorite)
     db.session.commit()
 
     return show_id

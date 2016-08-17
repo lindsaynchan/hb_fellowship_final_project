@@ -7,7 +7,9 @@
 <h1>{{ show_info["title"] }}</h1>
 <div><img src="{{ show_info["artwork_208x117"] }}"</div>
 <br><br>
+{% if "current_user" in session %}
 <button class="favorite-btn" id="{{ show_info["id"] }}">Favorite</button>
+{% endif %}
 <p id="first-aired">First Aired: {{ show_info["first_aired"][0:4] }}</p>
 <p id="network">Network: {{ show_info["network"] }}</p>
 <p id="description">Description: {{ show_info["overview"] }}</p>
@@ -51,15 +53,17 @@
     
     function addToFavoritesList(evt) {
         var id = this.id;
-        $.post('/save_to_favorites', {'id': id}, changeFavoritesButton);
+        $.post('/save_to_favorites', {'id': id}, changeButtonStatus);
+    
     }
 
-    function changeFavoritesButton(result) {
+    function changeButtonStatus(result) {
         var id = result;
-        //make button look selected
+        $('#' + id).html('&#10003; Favorite');
+    
     }
 
-    $('.favorite-btn').on('click', addToFavoritesList);
+    $('.favorite-btn').click(addToFavoritesList);
 
 </script>
 

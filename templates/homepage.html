@@ -3,9 +3,11 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
+{% if "current_user" not in session %}
 <a href="/login">Login</a>
-<br>
-<br>
+{% else %}
+<a href="/logout">Logout</a>
+{% endif %}
 <h3>Find your favorite show!</h3>
 <form action="/search-results" id="search_input">
     <input type="text" name="search">

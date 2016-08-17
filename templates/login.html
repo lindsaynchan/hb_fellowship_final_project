@@ -3,18 +3,22 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<form action="/login-user" id="login-form">
-    Email: <input type="text" name="email">
-    <br>
-    <br>
-    Password: <input type="password" name="password">
-    <br>
-    <br>
-    <input type="submit" value="Login">
-</form>
+
+{% if "current_user" not in session %}
+    <form action="/login-user" id="login-form">
+        Email: <input type="text" name="email">
+        <br>
+        <br>
+        Password: <input type="password" name="password">
+        <br>
+        <br>
+        <input type="submit" value="Login">
+    </form>
+{% else %}
 <form action="/logout" id="logout_btn">
     <input type="submit" value="Logout">
 </form>
+{% endif %}
 <form action="/new-user" id="new_user_btn">
     <input type="submit" value="Sign Up">
 </form>

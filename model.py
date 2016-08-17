@@ -28,9 +28,12 @@ class Show(db.Model):
 
     __tablename__ = "shows"
 
-
+    show_id = db.Column(db.Integer,
+                        primary_key=True,
+                        autoincrement=True)
     guidebox_id = db.Column(db.String(20),
-                        primary_key=True)
+                        unique=True,
+                        nullable=False)
     title = db.Column(db.Unicode(100),
                       nullable=False)
     first_aired = db.Column(db.Date,
