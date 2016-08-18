@@ -7,10 +7,13 @@
 <p>Email: {{ session["current_user"] }}</p>
 
 <h3>Favorite's List</h3>
+<ul>
+{% for favorite in user_id[0].favorites %}
 
+    <li>{{ favorite.show.title }}</li>
 
-
-
+{% endfor %}
+</ul>
 {% endblock %}
 
 

@@ -2,13 +2,15 @@
 
 import os
 from jinja2 import StrictUndefined
-from flask import Flask, render_template, request, flash, redirect, session
+from flask import Flask, render_template, request, flash, redirect, session, jsonify
 from model import connect_to_db, db, User, Show, StreamingService, Favorite, CableListing, Streaming, Network
 from guidebox import guidebox_search_title, guidebox_show_info, guidebox_season_info, guidebox_streaming_sources_info
 from onconnect import onconnect_search_series_id, onconnect_search_airings
 import requests
 import urllib2
 import arrow
+import json
+
 
 
 GUIDEBOX_BASE_URL = "http://api-public.guidebox.com/v1.43/US/"
@@ -106,17 +108,6 @@ def create_new_user():
         return redirect("/login")
 
 
-@app.route('/user-profile')
-def show_user_profile():
-    """Show user profile including favorites list."""
-
-    email = session["current_user"]
-
-    user_id = db.session.query(User.favorites).filter(User.email==email).all()
-
-    return render_template("user_profile.html", user_id=user_id)
-
-
 @app.route('/search-results')
 def show_results():
     """Search results page."""
@@ -155,11 +146,28 @@ def series_information(guidebox_id):
     #obtaining listing information for a 24 hour period from the current time
     airings = onconnect_search_airings(series_id)
 
+    #find the current logged in user
+    user_email = session["current_user"]
+
+    #use email to find the user_id
+    user_id = db.session.query(User.user_id).filter(User.email==user_email).one()
+
+    #check if user has favorited show already
+    favorite = Favorite.query.filter_by(guidebox_id=guidebox_id, user_id=user_id).first()
+
+    #if user has favorited, send back "&#10003; Favorite"
+    if favorite:
+        favorited = True
+    #if has not favorited yet, send back just "Favorite"
+    else:
+        favorited = False
+
     return render_template("show_page.html",
                             show_info=show_info, 
                             seasons_results=seasons_results,
                             all_streaming_sources=all_streaming_sources,
-                            airings=airings)
+                            airings=airings,
+                            favorited=favorited)
 
 
 @app.route('/save_to_favorites', methods=['POST'])
@@ -168,23 +176,46 @@ def save_to_favorites_list():
 
     #get show id from the event handler/post request
     show_id = str(request.form.get("id"))
+    #get button content from the event handler/post request
+    button_content = request.form.get("button_content")
+    button_content_encoded = button_content.encode('utf-8')
 
+    #save utf-8 encoded checkmark as a string variable
+    check_mark = "\xe2\x9c\x93"
+
+    #find the current logged in user
     user_email = session["current_user"]
 
+    #use email to find the user_id
     user_id = db.session.query(User.user_id).filter(User.email==user_email).one()
+    #if the show has not been favorited yet
+    if check_mark not in button_content_encoded:
+        #add row in favorites table
+        favorite = Favorite(guidebox_id=show_id, user_id=user_id)
+        db.session.add(favorite)
+        db.session.commit()
+        #pass back the show_id and that the show has been favorited
+        payload = {"show_id":show_id,"favorite":"True"}
+        return jsonify(payload)
+    else:
+        #delete row in favorites table
+        Favorite.query.filter_by(guidebox_id=show_id).delete()
+        db.session.commit()
+        #pass back the show_id and that the show has been unfavorited
+        payload = {"show_id":show_id,"favorite":"False"}
+        return jsonify(payload)
 
-    #add in row of favorites table using show id and user id
-    favorite = Favorite(guidebox_id=show_id, user_id=user_id)
-    db.session.add(favorite)
-    db.session.commit()
-
-    return show_id
-
-@app.route('/user/<user_id>')
-def show_user(user_id):
+@app.route('/user-profile')
+def show_user():
     """Show user's profile."""
 
-    return render_template("user_profile.html")
+    #get user email from session
+    email = session["current_user"]
+
+    #get user_id to get access to favorites table and users table
+    user_id = User.query.filter(User.email==email).all()
+
+    return render_template("user_profile.html", user_id=user_id)
 
 
 ##########################################################################

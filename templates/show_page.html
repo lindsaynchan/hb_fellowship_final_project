@@ -8,7 +8,11 @@
 <div><img src="{{ show_info["artwork_208x117"] }}"</div>
 <br><br>
 {% if "current_user" in session %}
-<button class="favorite-btn" id="{{ show_info["id"] }}">Favorite</button>
+<button class="favorite-btn" id="{{ show_info["id"] }}">
+    {% if favorited %}
+    &#10003; 
+    {% endif %}
+    Favorite</button>
 {% endif %}
 <p id="first-aired">First Aired: {{ show_info["first_aired"][0:4] }}</p>
 <p id="network">Network: {{ show_info["network"] }}</p>
@@ -50,19 +54,26 @@
     {% endif %}
 </p>
 <script>
-    
+    //when the favorite button is clicked, submit post request to add/delete from favorites table
     function addToFavoritesList(evt) {
         var id = this.id;
-        $.post('/save_to_favorites', {'id': id}, changeButtonStatus);
+        var buttonContent = $('.favorite-btn').html()
+        $.post('/save_to_favorites', {'id': id, 'button_content':buttonContent}, changeButtonStatus);
     
     }
 
+    //receiving the information from the server to determine whether the favorite button has a checkmark or not
     function changeButtonStatus(result) {
-        var id = result;
-        $('#' + id).html('&#10003; Favorite');
-    
+        var id = result["show_id"];
+        if (result["favorite"] == "True") {
+            $('#' + id).html('&#10003; Favorite');
+        }
+        else {
+            $('#' + id).html('Favorite');
+        }    
     }
 
+    //event listener on the favorite button
     $('.favorite-btn').click(addToFavoritesList);
 
 </script>

@@ -10,23 +10,19 @@ ONCONNECT_API_KEY = os.environ.get('ONCONNECT_API_KEY')
 def onconnect_search_series_id(show_name):
     """Finding series_id using the show title name from Guidebox's information."""
 
+    #reformatting the show name for the API call
     name = show_name.replace(" ", "+")
 
     #format OnConnect url
     url = "http://data.tmsapi.com/v1.1/programs/search?limit=15&q=" + name + "&entityType=series&api_key=" + ONCONNECT_API_KEY
 
-    print url
-
     #submit API request
     show_search_response = requests.get(url)
     #close request
-
     show_search_response.close()
 
     #save request as a json object
     show_search_response = show_search_response.json()
-
-    print show_search_response
 
     #get series_id and save as a variable
     series_id = str(show_search_response["hits"][0]["program"]["seriesId"])
@@ -38,8 +34,6 @@ def onconnect_search_airings(onconnect_series_id):
 
     #obtaining the current date and time in UTC
     current_date_time = datetime.now()
-
-    print current_date_time
 
     #format the date time in the correct format for On Connect url
     formatted_current_date = current_date_time.strftime('%Y-%m-%d'+'T'+'%H:%M'+'Z')
