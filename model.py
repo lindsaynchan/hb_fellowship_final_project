@@ -36,6 +36,8 @@ class Show(db.Model):
                         nullable=False)
     title = db.Column(db.Unicode(100),
                       nullable=False)
+    artwork_urls = db.Column(db.String(500),
+                        nullable=True)
     first_aired = db.Column(db.Date,
                             nullable=True)
     network = db.Column(db.String(20),

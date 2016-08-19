@@ -12,9 +12,6 @@ import arrow
 import json
 
 
-
-GUIDEBOX_BASE_URL = "http://api-public.guidebox.com/v1.43/US/"
-
 app = Flask(__name__)
 
 app.secret_key = os.environ.get('APP_KEY')
@@ -22,6 +19,9 @@ GUIDEBOX_API_KEY = os.environ.get('GUIDEBOX_API_KEY')
 ONCONNECT_API_KEY = os.environ.get('ONCONNECT_API_KEY')
 
 app.jinja_env.undefined = StrictUndefined
+
+GUIDEBOX_BASE_URL = "http://api-public.guidebox.com/v1.43/US/" + GUIDEBOX_API_KEY
+
 
 ##########################################################################
 
@@ -146,19 +146,22 @@ def series_information(guidebox_id):
     #obtaining listing information for a 24 hour period from the current time
     airings = onconnect_search_airings(series_id)
 
-    #find the current logged in user
-    user_email = session["current_user"]
+    if "current_user" in session:
+        #find the current logged in user
+        user_email = session["current_user"]
 
-    #use email to find the user_id
-    user_id = db.session.query(User.user_id).filter(User.email==user_email).one()
+        #use email to find the user_id
+        user_id = db.session.query(User.user_id).filter(User.email==user_email).one()
 
-    #check if user has favorited show already
-    favorite = Favorite.query.filter_by(guidebox_id=guidebox_id, user_id=user_id).first()
+        #check if user has favorited show already
+        favorite = Favorite.query.filter_by(guidebox_id=guidebox_id, user_id=user_id).first()
 
-    #if user has favorited, send back "&#10003; Favorite"
-    if favorite:
-        favorited = True
-    #if has not favorited yet, send back just "Favorite"
+        #if user has favorited, send back "&#10003; Favorite"
+        if favorite:
+            favorited = True
+        #if has not favorited yet, send back just "Favorite"
+        else:
+            favorited = False
     else:
         favorited = False
 
