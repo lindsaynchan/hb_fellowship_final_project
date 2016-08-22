@@ -151,10 +151,10 @@ def series_information(guidebox_id):
         user_email = session["current_user"]
 
         #use email to find the user_id
-        user_id = db.session.query(User.user_id).filter(User.email==user_email).one()
+        user_id = db.session.query(User.user_id).filter(User.email==user_email).all()
 
         #check if user has favorited show already
-        favorite = Favorite.query.filter_by(guidebox_id=guidebox_id, user_id=user_id).first()
+        favorite = Favorite.query.filter_by(guidebox_id=guidebox_id, user_id=user_id[0]).all()
 
         #if user has favorited, send back "&#10003; Favorite"
         if favorite:

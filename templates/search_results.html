@@ -3,11 +3,16 @@
 {% block title %}Search{% endblock %}
 
 {% block content %}
-
-{% for result in results %}
-    <ul>
-        <li><a href="/show/{{ result["id"] }}">{{ result["title"] }}</a> ({{ result["first_aired"][0:4] }})</li>
-    </ul>        
-{% endfor %}
-
+{% if results %}
+    {% for result in results %}
+        <ul>
+            <li><a href="/show/{{ result["id"] }}">{{ result["title"] }}</a>
+                {% if result["first_aired"] %}
+                    ({{ result["first_aired"][0:4] }})
+                 {% endif %}</li>
+        </ul>        
+    {% endfor %}
+{% else %}
+    <p>Sorry, there's nothing matching your search.</p>
+{% endif %}
 {% endblock %}

@@ -10,7 +10,7 @@
 <ul>
 {% for favorite in user_id[0].favorites %}
 
-    <li>{{ favorite.show.title }}</li>
+    <li><a href="/show/{{ favorite.show.guidebox_id }}">{{ favorite.show.title }}</a></li>
 
 {% endfor %}
 </ul>
