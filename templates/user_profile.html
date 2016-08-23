@@ -7,13 +7,17 @@
 <p>Email: {{ session["current_user"] }}</p>
 
 <h3>Favorite's List</h3>
-<ul>
-{% for favorite in user_id[0].favorites %}
+{% if user_id.favorites %}
+    <ul>
+    {% for favorite in user_id.favorites %}
 
-    <li><a href="/show/{{ favorite.show.guidebox_id }}">{{ favorite.show.title }}</a></li>
+        <li><a href="/show/{{ favorite.show.guidebox_id }}">{{ favorite.show.title }}</a></li>
 
-{% endfor %}
-</ul>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>You don't have any favorited shows yet!</p>
+{% endif %}
 {% endblock %}
 
 

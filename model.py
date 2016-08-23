@@ -19,7 +19,7 @@ class User(db.Model):
     email = db.Column(db.String(64),
                       unique=True,
                       nullable=False)
-    password = db.Column(db.String(20),
+    password = db.Column(db.String(75),
                          nullable=False)
 
 

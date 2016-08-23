@@ -10,6 +10,7 @@ import requests
 import urllib2
 import arrow
 import json
+import bcrypt
 
 
 app = Flask(__name__)
@@ -40,19 +41,19 @@ def show_login_page():
     return render_template("login.html")
 
 
-@app.route('/login-user')
+@app.route('/login-user', methods=['POST'])
 def login_user():
     """Login user."""
 
     #get email and password from login form and save as variables
-    email = request.args.get("email")
-    password = request.args.get("password")
+    email = request.form.get("email")
+    password = request.form.get("password")
 
     #run query to check if email and password is correct in the database
-    emails = User.query.filter(User.email==email, User.password==password).all()
+    user = User.query.filter(User.email==email).first()
 
     #if email and password match what's in the system, add user to the session and redirect to homepage
-    if emails:
+    if bcrypt.checkpw(password, user.password):
         session["current_user"] = email
         print session
 
@@ -84,13 +85,13 @@ def show_new_user_page():
     return render_template("new_user.html")
 
 
-@app.route('/create-new-user')
+@app.route('/create-new-user', methods=['POST'])
 def create_new_user():
     """Create new user."""
 
     #get email and password from form and save as variables
-    email = request.args.get("email")
-    password = request.args.get("password")
+    email = request.form.get("email")
+    password = request.form.get("password")
 
     #run query to check if email is already in the database
     emails = User.query.filter(User.email==email).all()
@@ -101,7 +102,8 @@ def create_new_user():
         return redirect("/new-user")
     #else add the new user information to the table
     else:
-        user = User(email=email, password=password)
+        hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
+        user = User(email=email, password=hashed_password)
         db.session.add(user)
         db.session.commit()
         print session
@@ -216,7 +218,7 @@ def show_user():
     email = session["current_user"]
 
     #get user_id to get access to favorites table and users table
-    user_id = User.query.filter(User.email==email).all()
+    user_id = User.query.filter(User.email==email).first()
 
     return render_template("user_profile.html", user_id=user_id)
 

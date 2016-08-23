@@ -5,7 +5,7 @@
 {% block content %}
 
 {% if "current_user" not in session %}
-    <form action="/login-user" id="login-form">
+    <form action="/login-user" id="login-form" method="POST">
         Email: <input type="text" name="email">
         <br>
         <br>
