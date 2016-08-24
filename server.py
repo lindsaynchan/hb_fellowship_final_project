@@ -53,16 +53,20 @@ def login_user():
     user = User.query.filter(User.email==email).first()
 
     #if email and password match what's in the system, add user to the session and redirect to homepage
-    if bcrypt.checkpw(password, user.password):
-        session["current_user"] = email
-        print session
+    if user:
+        if bcrypt.checkpw(password, user.password):
+            session["current_user"] = email
+            print session
 
-        flash("Logged in as %s." % email)
+            flash("Logged in as %s." % email)
 
-        return redirect("/")
-    #if email and password does not match what's in the system, redirect to login
+            return redirect("/")
+        #if email and password does not match what's in the system, redirect to login
+        else:
+            flash("That email and password combination does not exist in the system.")
+            return redirect("/login")
     else:
-        flash("That email and password combination does not exist in the system.")
+        flash("That email is not registered in the system yet.")
         return redirect("/login")
 
 @app.route('/logout')
@@ -116,12 +120,16 @@ def show_results():
 
     #get the search bar input and save as a variable
     search = request.args.get("search")
-    #turn unicode in string
-    search = str(search)
-    #encode search
-    encoded_search = urllib2.quote(search)
-    #API call using title of series, producing results that are close to the search 
-    results = guidebox_search_title(encoded_search)
+
+    if search:
+        #turn unicode in string
+        search = str(search)
+        #encode search
+        encoded_search = urllib2.quote(search)
+        #API call using title of series, producing results that are close to the search 
+        results = guidebox_search_title(encoded_search)
+    else:
+        results = []
 
     return render_template("search_results.html", results=results)
 
@@ -130,24 +138,28 @@ def show_results():
 def series_information(guidebox_id):
     """Show page containing basic information about the series and where a user can watch the series online and on cable TV."""
 
-    #gathering information regarding the show
-    show_info = guidebox_show_info(guidebox_id)
+    #query the database to check if the show's already there
+    show = Show.query.filter(Show.guidebox_id==guidebox_id).one()
 
-    #gathering information about the show's seasons
-    seasons_results = guidebox_season_info(guidebox_id)
-
-    #gathering information about where the show's available online
-    all_streaming_sources = guidebox_streaming_sources_info(guidebox_id)
-
-    #get show title from Guidebox so it can be used in the OnConnect title search url 
-    show_title = str(show_info["title"])
-
-    #obtaining the OnConnect seriesId that will be used in the OnConnect series airings url
-    series_id = onconnect_search_series_id(show_title)
-
-    #obtaining listing information for a 24 hour period from the current time
-    airings = onconnect_search_airings(series_id)
-
+    #if show is in database, pass jinja the show object
+    if show:
+        show_info = show
+        print "Show in the database."
+    else:
+        #else, run API call to get show info
+        show_info = guidebox_show_info(guidebox_id)
+        #insert new show into table
+        show = Show(guidebox_id=result["id"],
+                    title=result["title"],
+                    artwork_urls=result["artwork_608x342"],
+                    first_aired=result["first_aired"],
+                    description=result["overview"])
+        db.session.add(show)
+        print "%s has been added to show table." % (result["title"])
+        num += 1
+        db.session.commit()
+        print "Added show to database."
+        show_info = Show.query.filter(Show.guidebox_id==guidebox_id).one()
     if "current_user" in session:
         #find the current logged in user
         user_email = session["current_user"]
@@ -168,12 +180,60 @@ def series_information(guidebox_id):
         favorited = False
 
     return render_template("show_page.html",
-                            show_info=show_info, 
-                            seasons_results=seasons_results,
-                            all_streaming_sources=all_streaming_sources,
-                            airings=airings,
+                            show_info=show_info,
                             favorited=favorited)
 
+@app.route('/show_info')
+def get_show_information(guidebox_id):
+    """Get first airing, description, network and seasons information about a series."""
+    #get the show from the database
+    show = Show.query.filter(Show.guidebox_id==guidebox_id).one()
+
+    #check if show has a description, if it does then just pass the show on
+    if show.description:
+        show_info = show
+        print "Show description in database."
+    #if not, call API to get the show description, add description to show information in the database
+    else:
+        #API call
+        show_info = guidebox_show_info(guidebox_id)
+        show.description = show_info["overview"]
+        db.session.commit()
+        print "Added show description to the database."
+
+    #make API to get season information
+    seasons_results = guidebox_season_info(guidebox_id)
+
+    payload = {show_info:show_info,seasons_results:seasons_results}
+
+    return payload
+
+@app.route('/streaming')
+def get_streaming_information(guidebox_id):
+    """Get first airing, description, network and seasons information about a series."""
+
+    #gathering information about where the show's available online
+    all_streaming_sources = guidebox_streaming_sources_info(guidebox_id)
+
+    return all_streaming_sources
+
+@app.route('/tv_listing')
+def get_listing_information(guidebox_id):
+    """Get first airing, description, network and seasons information about a series."""
+
+    #get the show from the database
+    show = Show.query.filter(Show.guidebox_id==guidebox_id).one()
+
+    #get show title from Guidebox so it can be used in the OnConnect title search url 
+    show_title = str(show.title)
+
+    #obtaining the OnConnect seriesId that will be used in the OnConnect series airings url
+    series_id = onconnect_search_series_id(show_title)
+
+    #obtaining listing information for a 24 hour period from the current time
+    airings = onconnect_search_airings(series_id)
+
+    return airings
 
 @app.route('/save_to_favorites', methods=['POST'])
 def save_to_favorites_list():

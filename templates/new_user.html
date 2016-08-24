@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}New User{% endblock %}
-
+{% block navbar %}{% endblock %}
 {% block content %}
 <form action="/create-new-user" id="new-user-form" method="POST">
     Email: <input type="text" name="email">

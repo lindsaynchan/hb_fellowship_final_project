@@ -1,14 +1,15 @@
 {% extends 'base.html' %}
 
 {% block title %}Home{% endblock %}
-
+{% block navbar %}
+    {% if "current_user" not in session %}
+    <li><a href="/login">Login</a></li>
+    {% else %}
+    <li><a href="/user-profile">Profile</a></li>
+    <li><a href="/logout">Logout</a></li>
+    {% endif %}
+{% endblock %}
 {% block content %}
-{% if "current_user" not in session %}
-<a href="/login">Login</a>
-{% else %}
-<a href="/user-profile">Profile</a>
-<a href="/logout">Logout</a>
-{% endif %}
 <h3>Find your favorite show!</h3>
 <form action="/search-results" id="search_input">
     <input type="text" name="search">

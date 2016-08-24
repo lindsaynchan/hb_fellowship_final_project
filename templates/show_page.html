@@ -1,58 +1,44 @@
 {% extends 'base.html' %}
-
 {% block title %}Series!{% endblock %}
-
+{% block header %}
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.0/united/bootstrap.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.2/angular.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.2/angular-route.js"></script>
+    <script src="/static/showpage.js"></script>
+{% endblock %}
 {% block content %}
 
-<h1>{{ show_info["title"] }}</h1>
-<div><img src="{{ show_info["artwork_208x117"] }}"</div>
+<h1>{{ show_info.title }}</h1>
+
+<div><img src="{{ show_info.artwork_urls }}"</div>
+
 <br><br>
+
 {% if "current_user" in session %}
-<button class="favorite-btn" id="{{ show_info["id"] }}">
+<button class="favorite-btn" id="{{ show_info.guidebox_id }}">
     {% if favorited %}
     &#10003; 
     {% endif %}
     Favorite</button>
 {% endif %}
-<p id="first-aired">First Aired: {{ show_info["first_aired"][0:4] }}</p>
-<p id="network">Network: {{ show_info["network"] }}</p>
-<p id="description">Description: {{ show_info["overview"] }}</p>
-<p>
-    <h3>Seasons</h3>
-    {% for season in seasons_results %}
-        <ul>
-            <li>Season {{ season["season_number"] }} 
-                ({% if season["first_airdate"] %} 
-                    {{ season["first_airdate"][0:4] }}
-                {% else %}
-                    N/A
-                {% endif %})</li>
-        </ul>
-    {% endfor %}
-</p>
-<p>
-    <h3>Available Online</h3>
-    {% for source in all_streaming_sources %}
-        <ul>
-            <li>{{ source["display_name"] }}</li>
-        </ul>
-    {% endfor %}
-</p>
-<p>
-    <h3>Where to Watch on Cable TV</h3>
-    {% if airings %}
-        {% for airing in airings %}
-            <ul>
-                <li>{{ airing["program"]["title"] }}: {{ airing["program"]["episodeTitle"] }}</li>
-                <li>Season: {{ airing["program"]["seasonNum"] }}, Episode: {{ airing["program"]["episodeNum"] }}</li>
-                <li>{{ airing["station"]["callSign"] }}</li>
-                <li>{{ airing["startTime"] }}</li>
-            </ul>
-        {% endfor %}
-    {% else %}
-        <p>Currently there are no upcoming airings of {{ show_info["title"] }}.</p>
-    {% endif %}
-</p>
+<br><br>
+<div>
+    <ul class="nav navbar-nav">
+        <li><a href="#/show_info">Info</a></li>
+        <li><a href="#/streaming">Streaming</a></li>
+        <li><a href="#/tv_listing">TV Listings</a></li>
+    </ul>
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+
+                <div ng-view></div>
+
+            </div>
+        </div>
+    </div>
+</div>
 <script>
     //when the favorite button is clicked, submit post request to add/delete from favorites table
     function addToFavoritesList(evt) {
@@ -76,8 +62,16 @@
     //event listener on the favorite button
     $('.favorite-btn').click(addToFavoritesList);
 
+    $('#myTabs a').click(function (e) {
+                      e.preventDefault()
+                      $(this).tab('show')
+                    })
 </script>
 
 {% endblock %}
+</html>
+
+
+
 
 

@@ -81,8 +81,12 @@ def guidebox_season_info(show_id):
     seasons_response.close()
     #save request as a json object
     seasons_response = seasons_response.json()
-    #save seasons_results as a variable to pass through jinja
-    seasons_results = seasons_response["results"]
+
+    if seasons_response:
+        #save seasons_results as a variable to pass through jinja
+        seasons_results = seasons_response["results"]
+    else:
+        seasons_results = []
 
     return seasons_results
 

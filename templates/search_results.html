@@ -3,16 +3,24 @@
 {% block title %}Search{% endblock %}
 
 {% block content %}
-{% if results %}
-    {% for result in results %}
-        <ul>
-            <li><a href="/show/{{ result["id"] }}">{{ result["title"] }}</a>
-                {% if result["first_aired"] %}
-                    ({{ result["first_aired"][0:4] }})
-                 {% endif %}</li>
-        </ul>        
-    {% endfor %}
-{% else %}
-    <p>Sorry, there's nothing matching your search.</p>
-{% endif %}
+
+    <form action="/search-results" id="search_input">
+        <input type="text" name="search">
+        <br>
+        <input type="submit" value="Search!">
+    </form>
+<br><br>
+    {% if results %}
+        {% for result in results %}
+            <ul>
+                <li><a href="/show/{{ result["id"] }}">{{ result["title"] }}</a>
+                    {% if result["first_aired"] %}
+                        ({{ result["first_aired"][0:4] }})
+                     {% endif %}</li>
+            </ul>        
+        {% endfor %}
+    {% else %}
+        <p>Sorry, there's nothing that matches your search!</p>
+    {% endif %}
+
 {% endblock %}

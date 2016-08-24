@@ -59,10 +59,7 @@ def load_shows(data_file):
             try:
                 show = Show(guidebox_id=result["id"],
                             title=result["title"],
-                            artwork_urls=[result["artwork_208x117"],
-                                          result["artwork_304x171"],
-                                          result["artwork_448x252"],
-                                          result["artwork_608x342"]],
+                            artwork_urls=result["artwork_608x342"],
                             first_aired=result["first_aired"])
                 db.session.add(show)
                 print "%s has been added to show table." % (result["title"])
@@ -75,10 +72,7 @@ def load_shows(data_file):
             try:
                 show = Show(guidebox_id=result["id"],
                             title=result["title"],
-                            artwork_urls=[result["artwork_208x117"],
-                                          result["artwork_304x171"],
-                                          result["artwork_448x252"],
-                                          result["artwork_608x342"]])
+                            artwork_urls=result["artwork_608x342"])
                 db.session.add(show)
                 print "%s has been added to show table." % (result["title"])
                 num += 1
