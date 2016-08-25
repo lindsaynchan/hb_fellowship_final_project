@@ -1,17 +1,13 @@
 {% extends 'base.html' %}
 {% block title %}Series!{% endblock %}
 {% block header %}
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.0/united/bootstrap.min.css" rel="stylesheet">
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.2/angular.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.2/angular-route.js"></script>
-    <script src="/static/showpage.js"></script>
+<script src="/static/showpage.js"></script>
 {% endblock %}
 {% block content %}
 
 <h1>{{ show_info.title }}</h1>
 
-<div><img src="{{ show_info.artwork_urls }}"</div>
+<div><img src="{{ show_info.artwork_urls }}"></div>
 
 <br><br>
 
@@ -22,8 +18,10 @@
     {% endif %}
     Favorite</button>
 {% endif %}
+<script>var guidebox_id={{ show_info.guidebox_id }};</script>
 <br><br>
-<div>
+{% raw %}
+<div ng-app="showInformation">
     <ul class="nav navbar-nav">
         <li><a href="#/show_info">Info</a></li>
         <li><a href="#/streaming">Streaming</a></li>
@@ -39,7 +37,9 @@
         </div>
     </div>
 </div>
+{% endraw %}
 <script>
+
     //when the favorite button is clicked, submit post request to add/delete from favorites table
     function addToFavoritesList(evt) {
         var id = this.id;
@@ -63,9 +63,10 @@
     $('.favorite-btn').click(addToFavoritesList);
 
     $('#myTabs a').click(function (e) {
-                      e.preventDefault()
-                      $(this).tab('show')
-                    })
+        e.preventDefault();
+        $(this).tab('show');
+    });
+
 </script>
 
 {% endblock %}

@@ -18,7 +18,37 @@
 {% else %}
     <p>You don't have any favorited shows yet!</p>
 {% endif %}
+<br><br>
+<h4>Find your favorite shows!</h4>
+<button class="schedule-btn" id="favorites_listings">TV Listings</button>
+<button class="schedule-btn" id="favorites_online">Online</button>
+<br><br>
+<span id="display"></span>
 {% endblock %}
+
+<script>
+
+    //when the favorite button is clicked, submit post request to add/delete from favorites table
+    function addToSchedule(evt) {
+        $.get('/save_to_favorites', changeButtonStatus);
+    
+    }
+
+    //receiving the information from the server to determine whether the favorite button has a checkmark or not
+    function changeButtonStatus(result) {
+        var id = result["show_id"];
+        if (result["favorite"] == "True") {
+            $('#' + id).html('&#10003; Favorite');
+        }
+        else {
+            $('#' + id).html('Favorite');
+        }    
+    }
+
+    //event listener on the favorite button
+    $('#favorites_listings').click(addToSchedule);
+
+</script>
 
 
 

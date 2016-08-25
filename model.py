@@ -47,6 +47,10 @@ class Show(db.Model):
     seasons = db.Column(db.String(20),
                         nullable=True)
 
+    def as_dict(self):
+
+        return {"show_id":self.show_id,"guidebox_id":self.guidebox_id,"title":self.title,"artwork_urls":self.artwork_urls,"first_aired":self.first_aired.year,"network":self.network,"description":self.description,"seasons":self.seasons}
+
 
 class Favorite(db.Model):
     """Creating favorite shows table."""

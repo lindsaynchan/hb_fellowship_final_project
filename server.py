@@ -184,42 +184,70 @@ def series_information(guidebox_id):
                             favorited=favorited)
 
 @app.route('/show_info')
-def get_show_information(guidebox_id):
-    """Get first airing, description, network and seasons information about a series."""
+def get_show_information():
+    """Get first airing, description and network information about a series."""
+
+    #getting the guidebox_id variable from show_page.html
+    guidebox_id = request.args.get("guidebox_id")
+
     #get the show from the database
     show = Show.query.filter(Show.guidebox_id==guidebox_id).one()
 
     #check if show has a description, if it does then just pass the show on
-    if show.description:
-        show_info = show
-        print "Show description in database."
+    if show.description and show.network:
+        print "\n\n\nShow description and network in database.\n\n\n"
     #if not, call API to get the show description, add description to show information in the database
     else:
-        #API call
-        show_info = guidebox_show_info(guidebox_id)
-        show.description = show_info["overview"]
+        #API call to get the show information
+        show_data = guidebox_show_info(guidebox_id)
+        #add show description to table
+        show.description = show_data["overview"]
+        show.network = show_data["network"]
         db.session.commit()
-        print "Added show description to the database."
+        print "\n\n\nAdded show description and network to the database.\n\n\n"
+        #query and save updated show information to variable
 
-    #make API to get season information
+    show_info = Show.query.filter(Show.guidebox_id==guidebox_id).one()
+
+    return jsonify(show_info.as_dict())
+
+@app.route('/seasons_info')
+def get_seasons_information():
+    """Get seasons information about a series."""
+
+    #getting the guidebox_id variable from show_page.html
+    guidebox_id = request.args.get("guidebox_id")
+
+    #make API to get season information, gets back list of season information
     seasons_results = guidebox_season_info(guidebox_id)
 
-    payload = {show_info:show_info,seasons_results:seasons_results}
+    #manipulate the season data to only show year and put it back in as a list of dictionaries
+    # seasons_dict = {}
 
-    return payload
+    # for season in seasons_results:
+
+
+    return jsonify(seasons_results)
+
 
 @app.route('/streaming')
-def get_streaming_information(guidebox_id):
+def get_streaming_information():
     """Get first airing, description, network and seasons information about a series."""
+
+   #getting the guidebox_id variable from show_page.html
+    guidebox_id = request.args.get("guidebox_id")
 
     #gathering information about where the show's available online
     all_streaming_sources = guidebox_streaming_sources_info(guidebox_id)
 
-    return all_streaming_sources
+    return jsonify(all_streaming_sources)
 
 @app.route('/tv_listing')
-def get_listing_information(guidebox_id):
+def get_listing_information():
     """Get first airing, description, network and seasons information about a series."""
+
+    #getting the guidebox_id variable from show_page.html
+    guidebox_id = request.args.get("guidebox_id")
 
     #get the show from the database
     show = Show.query.filter(Show.guidebox_id==guidebox_id).one()
@@ -233,7 +261,7 @@ def get_listing_information(guidebox_id):
     #obtaining listing information for a 24 hour period from the current time
     airings = onconnect_search_airings(series_id)
 
-    return airings
+    return jsonify(airings)
 
 @app.route('/save_to_favorites', methods=['POST'])
 def save_to_favorites_list():

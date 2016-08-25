@@ -1,18 +1,12 @@
-<p id="first-aired">First Aired: {{ show_info["first_aired"][0:4] }}</p>
+<p id="first-aired">First Aired: {{ show_info["first_aired"] }}</p>
 <p id="network">Network: {{ show_info["network"] }}</p>
-<p id="description">Description: {{ show_info["overview"] }}</p>
+<p id="description">Description: {{ show_info["description"] }}</p>
 <p>
     <h3>Seasons</h3>
-    {% if seasons_results %}
-        {% for season in seasons_results %}
-            <ul>
-                <li>Season {{ season["season_number"] }} 
-                    ({% if season["first_airdate"] %} 
-                        {{ season["first_airdate"][0:4] }}
-                    {% else %}
-                        N/A
-                    {% endif %})</li>
-            </ul>
-        {% endfor %}
-    {% endif %}
+    <ul ng-init="seasons_info">
+        <li ng-repeat="season in seasons_info">
+            Season {{ season["season_number"] }} 
+            ({{ season["first_airdate"] }})
+        </li>
+    </ul>
 </p>
