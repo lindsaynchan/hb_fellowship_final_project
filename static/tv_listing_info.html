@@ -1,4 +1,8 @@
 <h3>TV Listings</h3>
+    <div ng-show="isLoading">
+        <p>Please wait while your schedule is loading...</p>
+        <div><img src="{{ randomGif }}"></div>
+    </div>
     <ul ng-init=listings>
         <li ng-repeat="listing in listings">
             {{ listing["program"]["title"] }}: {{ listing["program"]["episodeTitle"] }}

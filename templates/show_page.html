@@ -5,14 +5,14 @@
 {% endblock %}
 {% block content %}
 
-<h1>{{ show_info.title }}</h1>
+<h1>{{ show_info["title"] }}</h1>
 
-<div><img src="{{ show_info.artwork_urls }}"></div>
+<div><img src="{{ show_info["artwork_urls"] }}"></div>
 
 <br><br>
 
 {% if "current_user" in session %}
-<button class="favorite-btn" id="{{ show_info.guidebox_id }}">
+<button class="favorite-btn" id="{{ show_info["guidebox_id"] }}">
     {% if favorited %}
     &#10003; 
     {% endif %}
@@ -20,7 +20,7 @@
 {% endif %}
 
 <br><br>
-<script>var guidebox_id={{ show_info.guidebox_id }};</script>
+<script>var guidebox_id={{ show_info["guidebox_id"] }};</script>
 {% raw %}
 <div ng-app="showInformation">
     <ul class="nav navbar-nav">

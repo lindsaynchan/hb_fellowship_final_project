@@ -17,7 +17,12 @@ angular.module("favoritesListings", ['ngRoute'])
 
     .controller('ListingsController', function ($scope, $http) {
 
-        $scope.isLoading = true;
+        $http.get("/get_random_gif")
+        .then(function(response){
+            $scope.isLoading = true;
+            $scope.randomGif = response.data;
+        });
+        
 
         $http.get("/get_tv_listings")
         .then(function(response) {
@@ -29,8 +34,15 @@ angular.module("favoritesListings", ['ngRoute'])
 
     .controller('StreamingsController', function ($scope, $http) {
 
+        $http.get("/get_random_gif")
+        .then(function(response){
+            $scope.isLoading = true;
+            $scope.randomGif = response.data;
+        });
+
         $http.get("/all_streaming")
         .then(function(response) {
+            $scope.isLoading = false;
             $scope.streaming = response.data;
         });
 

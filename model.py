@@ -22,9 +22,20 @@ class User(db.Model):
     password = db.Column(db.String(75),
                          nullable=False)
 
-    def get_user_with_email(email):
-        user = User.query.filter(User.email==email).first()
+    @classmethod
+    def get_user_with_email(cls, email):
+        """Search for user in database using given an email address."""
+
+        SELECT = "SELECT * FROM User WHERE email = :email"
+        user_search = db.session.execute(cls.SELECT, {'email':email})
+        user = cursor.fetchone()
+        # user = db.session.query(User).filter(User.email==email).first()
         return user
+
+    def add_user(self, email, password):
+        user = User(email=email, password=password)
+        db.session.add(user)
+        db.session.commit()
 
 class Show(db.Model):
     """Creating TV shows table."""

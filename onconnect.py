@@ -18,7 +18,7 @@ def onconnect_search_series_id(show_name):
 
     #submit API request
     show_search_response = requests.get(url)
-    #close request
+
     show_search_response.close()
 
     #save request as a json object

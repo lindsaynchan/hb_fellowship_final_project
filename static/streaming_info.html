@@ -1,5 +1,8 @@
 <h3>Available Online</h3>
-
+    <div ng-show="isLoading">
+        <p>Please wait while your schedule is loading...</p>
+        <div><img src="{{ randomGif }}"></div>
+    </div>
     <ul ng-init="streaming">
         <li ng-repeat="source in streaming">
             {{ source["display_name"] }}

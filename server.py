@@ -6,6 +6,7 @@ from flask import Flask, render_template, request, flash, redirect, session, jso
 from model import connect_to_db, db, User, Show, StreamingService, Favorite, CableListing, Streaming, Network
 from guidebox import guidebox_search_title, guidebox_show_info, guidebox_season_info, guidebox_streaming_sources_info
 from onconnect import onconnect_search_series_id, onconnect_search_airings
+from giphy import giphy_random_generator
 import requests
 import urllib2
 import arrow
@@ -19,6 +20,7 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('APP_KEY')
 GUIDEBOX_API_KEY = os.environ.get('GUIDEBOX_API_KEY')
 ONCONNECT_API_KEY = os.environ.get('ONCONNECT_API_KEY')
+GIPHY_API_KEY = os.environ.get('GIPHY_API_KEY')
 
 app.jinja_env.undefined = StrictUndefined
 
@@ -51,7 +53,7 @@ def login_user():
     password = request.form.get("password")
 
     #get user from database
-    user = get_user_with_email(email)
+    user = db.session.query(User).filter(User.email==email).first()
 
     #if email and password match what's in the system, add user to the session and redirect to homepage
     if user:
@@ -99,7 +101,9 @@ def create_new_user():
     password = request.form.get("password")
 
     #run query to check if email is already in the database
-    user = get_user_with_email(email)
+    user = db.session.query(User).filter(User.email==email).first()
+
+    # user = get_user_with_email(email)
 
     #if it returns a row containing the email, redirect user to page again 
     if user:
@@ -111,9 +115,15 @@ def create_new_user():
         user = User(email=email, password=hashed_password)
         db.session.add(user)
         db.session.commit()
-        print session
         return redirect("/login")
 
+
+@app.route('/get_random_gif')
+def generate_random_gif():
+    """Generate random gif for loading time."""
+
+    random_gif_url = giphy_random_generator()
+    return jsonify(random_gif_url)
 
 @app.route('/search-results')
 def show_results():
@@ -123,11 +133,10 @@ def show_results():
     search = request.args.get("search")
 
     if search:
-        #turn unicode in string
         search = str(search)
-        #encode search
+        #encode search terms
         encoded_search = urllib2.quote(search)
-        #API call using title of series, producing results that are close to the search 
+        #API call using title of series
         results = guidebox_search_title(encoded_search)
     else:
         results = []
@@ -140,27 +149,27 @@ def series_information(guidebox_id):
     """Show page containing basic information about the series and where a user can watch the series online and on cable TV."""
 
     #query the database to check if the show's already there
-    show = Show.query.filter(Show.guidebox_id==guidebox_id).one()
+    show = Show.query.filter(Show.guidebox_id==guidebox_id).all()
 
-    #if show is in database, pass jinja the show object
+    #if show is in database, pass jinja the show result
     if show:
-        show_info = show
+        show_info = show[0]
         print "Show in the database."
     else:
         #else, run API call to get show info
         show_info = guidebox_show_info(guidebox_id)
+
         #insert new show into table
-        show = Show(guidebox_id=result["id"],
-                    title=result["title"],
-                    artwork_urls=result["artwork_608x342"],
-                    first_aired=result["first_aired"],
-                    description=result["overview"])
+        show = Show(guidebox_id=show_info["id"],
+                    title=show_info["title"],
+                    artwork_urls=show_info["artwork_608x342"],
+                    first_aired=show_info["first_aired"],
+                    description=show_info["overview"])
         db.session.add(show)
-        print "%s has been added to show table." % (result["title"])
-        num += 1
+        print "%s has been added to show table." % (show_info["title"])
         db.session.commit()
         print "Added show to database."
-        show_info = Show.query.filter(Show.guidebox_id==guidebox_id).one()
+        show_info = Show.query.filter(Show.guidebox_id==guidebox_id).all()
     if "current_user" in session:
         #find the current logged in user
         user_email = session["current_user"]
@@ -171,10 +180,10 @@ def series_information(guidebox_id):
         #check if user has favorited show already
         favorite = Favorite.query.filter_by(guidebox_id=guidebox_id, user_id=user_id[0]).all()
 
-        #if user has favorited, send back "&#10003; Favorite"
+        #if user has favorited
         if favorite:
             favorited = True
-        #if has not favorited yet, send back just "Favorite"
+        #if has not favorited yet
         else:
             favorited = False
     else:
@@ -301,7 +310,7 @@ def show_user():
     email = session["current_user"]
 
     #get user_id to get access to favorites table and users table
-    user = get_user_with_email(email)
+    user = db.session.query(User).filter(User.email==email).first()
 
     return render_template("user_profile.html", user=user)
 
@@ -313,7 +322,7 @@ def get_tv_listings():
     email = session["current_user"]
 
     #get user_id to get access to favorites table and users table
-    user = get_user_with_email(email)
+    user = db.session.query(User).filter(User.email==email).first()
 
     #use the backref relationship to find the titles of the user's favorite shows and save in a list
     favorite_titles = []
@@ -352,7 +361,7 @@ def get_all_streaming_info():
     if email:
 
         #get user_id to get access to favorites table and users table
-        user = get_user_with_email(email)
+        user = db.session.query(User).filter(User.email==email).first()
 
         #use the backref relationship to find the titles of the user's favorite shows and save in a list
         guidebox_info = {}
