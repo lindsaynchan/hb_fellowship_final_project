@@ -14,7 +14,7 @@ def onconnect_search_series_id(show_name):
     name = show_name.replace(" ", "+")
 
     #format OnConnect url
-    url = "http://data.tmsapi.com/v1.1/programs/search?limit=15&q=" + name + "&entityType=series&api_key=" + ONCONNECT_API_KEY
+    url = "http://data.tmsapi.com/v1.1/programs/search?limit=50&q=" + name + "&entityType=series&api_key=" + ONCONNECT_API_KEY
 
     #submit API request
     show_search_response = requests.get(url)
@@ -51,8 +51,15 @@ def onconnect_search_airings(onconnect_series_id):
     show_airings_response = requests.get(url)
     #close request
     show_airings_response.close()
+
     #save request as a json object
-    airings_info = show_airings_response.json()
+    try:
+        airings_info = show_airings_response.json()
+    except:
+        print "\n\n\n\n\n"
+        print "IN PDB!!!!"
+        print "\n\n\n\n\n"
+        import pdb;pdb.set_trace()
 
     #loop through each airing and change and replace the datetime string with arrow library and putting it into PST
     for airing in airings_info:

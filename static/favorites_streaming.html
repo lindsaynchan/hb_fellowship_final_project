@@ -1,0 +1,14 @@
+<h3>Available Online</h3>
+
+    <ul>
+        <div ng-repeat="show in streaming">
+            <b>{{ show.title }}</b>
+            <br>
+            <br>
+            <li ng-repeat="source in show.streaming">
+                {{ source["display_name"] }}
+            </li>
+            <br>
+            <br>
+        </div>
+    </ul>

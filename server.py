@@ -11,6 +11,7 @@ import urllib2
 import arrow
 import json
 import bcrypt
+import time
 
 
 app = Flask(__name__)
@@ -49,8 +50,8 @@ def login_user():
     email = request.form.get("email")
     password = request.form.get("password")
 
-    #run query to check if email and password is correct in the database
-    user = User.query.filter(User.email==email).first()
+    #get user from database
+    user = get_user_with_email(email)
 
     #if email and password match what's in the system, add user to the session and redirect to homepage
     if user:
@@ -98,10 +99,10 @@ def create_new_user():
     password = request.form.get("password")
 
     #run query to check if email is already in the database
-    emails = User.query.filter(User.email==email).all()
+    user = get_user_with_email(email)
 
     #if it returns a row containing the email, redirect user to page again 
-    if emails:
+    if user:
         flash("That email is already in the system.")
         return redirect("/new-user")
     #else add the new user information to the table
@@ -221,12 +222,6 @@ def get_seasons_information():
     #make API to get season information, gets back list of season information
     seasons_results = guidebox_season_info(guidebox_id)
 
-    #manipulate the season data to only show year and put it back in as a list of dictionaries
-    # seasons_dict = {}
-
-    # for season in seasons_results:
-
-
     return jsonify(seasons_results)
 
 
@@ -306,10 +301,83 @@ def show_user():
     email = session["current_user"]
 
     #get user_id to get access to favorites table and users table
-    user_id = User.query.filter(User.email==email).first()
+    user = get_user_with_email(email)
 
-    return render_template("user_profile.html", user_id=user_id)
+    return render_template("user_profile.html", user=user)
 
+@app.route('/get_tv_listings')
+def get_tv_listings():
+    """Get TV Listings for shows on favorite's list."""
+
+    #get user email from session
+    email = session["current_user"]
+
+    #get user_id to get access to favorites table and users table
+    user = get_user_with_email(email)
+
+    #use the backref relationship to find the titles of the user's favorite shows and save in a list
+    favorite_titles = []
+    for favorite in user.favorites:
+        favorite_titles.append(favorite.show.title)
+
+    #create list that will contain dictionaries with show title and a list of dictionaries regarding tv listings
+    listings = []
+
+    for title in favorite_titles:
+        show = {}
+        #convert title from unicode to string to run API call
+        title_str = str(title)
+        series_id = onconnect_search_series_id(title_str)
+        print "\n\n", series_id, "\n\n"
+        airings = onconnect_search_airings(series_id)
+        #add show title to dictionary, add airings object to dictionary
+        show["title"] = title_str
+        show["listings"] = airings
+        #add dictionary to the listings list
+        listings.append(show)
+        time.sleep(1)
+
+    
+    listings = jsonify(listings)
+
+    return listings
+
+@app.route('/all_streaming')
+def get_all_streaming_info():
+    """Get streaming information for shows on favorite's list."""
+
+    #get user email from session
+    email = session.get("current_user")
+
+    if email:
+
+        #get user_id to get access to favorites table and users table
+        user = get_user_with_email(email)
+
+        #use the backref relationship to find the titles of the user's favorite shows and save in a list
+        guidebox_info = {}
+        for favorite in user.favorites:
+            guidebox_info[str(favorite.show.guidebox_id)] = str(favorite.show.title)
+
+        streaming_info = []
+
+        for guidebox_id in guidebox_info:
+            show = {}
+            streaming_sources = guidebox_streaming_sources_info(guidebox_id)
+            #add show title to dictionary, add airings object to dictionary
+            show["id"] = guidebox_id
+            show["title"] = guidebox_info[guidebox_id]
+            show["streaming"] = streaming_sources
+            #add dictionary to the listings list
+            streaming_info.append(show)
+
+        streaming = jsonify(streaming_info)
+
+        return streaming
+
+    else:
+        flash("Please login first!")
+        return redirect('/login')
 
 ##########################################################################
 

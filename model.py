@@ -22,6 +22,9 @@ class User(db.Model):
     password = db.Column(db.String(75),
                          nullable=False)
 
+    def get_user_with_email(email):
+        user = User.query.filter(User.email==email).first()
+        return user
 
 class Show(db.Model):
     """Creating TV shows table."""
