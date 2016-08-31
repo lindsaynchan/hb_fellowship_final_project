@@ -4,11 +4,6 @@
 
 {% block content %}
 
-    <form action="/search-results" id="search_input">
-        <input type="text" name="search">
-        <br>
-        <input type="submit" value="Search!">
-    </form>
 <br><br>
     {% if results %}
         {% for result in results %}

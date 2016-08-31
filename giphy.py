@@ -8,7 +8,7 @@ GIPHY_API_KEY = os.environ.get('GIPHY_API_KEY')
 def giphy_random_generator():
     """Generate random television related gif."""
 
-    url = "http://api.giphy.com/v1/gifs/random?api_key=" + GIPHY_API_KEY + "&rating=pg-13&tag=television"
+    url = "http://api.giphy.com/v1/gifs/random?api_key=" + GIPHY_API_KEY + "&rating=pg&tag=television"
 
     #submit API request
     gif = requests.get(url)

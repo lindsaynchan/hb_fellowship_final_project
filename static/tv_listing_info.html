@@ -3,17 +3,21 @@
         <p>Please wait while your schedule is loading...</p>
         <div><img src="{{ randomGif }}"></div>
     </div>
-    <ul ng-init=listings>
-        <li ng-repeat="listing in listings">
-            {{ listing["program"]["title"] }}: {{ listing["program"]["episodeTitle"] }}
-            <br>
-            Season: {{ listing["program"]["seasonNum"] }}, Episode: {{ listing["program"]["episodeNum"] }}
-            <br>
-            {{ listing["station"]["callSign"] }}
-            <br>
-            {{ listing["startTime"] }}
-        </li>
-    </ul>
-
+    <div ng-if="listingsExist">
+        <ul ng-init=listings>
+            <li ng-repeat="listing in listings">
+                {{ listing["program"]["title"] }}: {{ listing["program"]["episodeTitle"] }}
+                <br>
+                Season: {{ listing["program"]["seasonNum"] }}, Episode: {{ listing["program"]["episodeNum"] }}
+                <br>
+                {{ listing["station"]["callSign"] }}
+                <br>
+                {{ listing["startTime"] }}
+            </li>
+        </ul>
+    </div>
+    <div ng-if="listingsDoNotExist">
+        There are currently no available listings!
+    </div>
 
 

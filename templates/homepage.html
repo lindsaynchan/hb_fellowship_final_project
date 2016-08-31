@@ -2,12 +2,6 @@
 
 {% block title %}Home{% endblock %}
 {% block navbar %}
-    {% if "current_user" not in session %}
-    <li><a href="/login">Login</a></li>
-    {% else %}
-    <li><a href="/user-profile">Profile</a></li>
-    <li><a href="/logout">Logout</a></li>
-    {% endif %}
 {% endblock %}
 {% block content %}
 <h3>Find your favorite show!</h3>

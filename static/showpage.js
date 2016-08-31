@@ -72,6 +72,12 @@ angular.module("showInformation", ['ngRoute'])
         .then(function(response) {
             $scope.isLoading = false;
             $scope.listings = response.data;
+            $scope.listingsExist = true;
+            $scope.listingsDoNotExist = false;
+            if (response.data.length < 1) {
+                $scope.listingsExist = false;
+                $scope.listingsDoNotExist = true;
+            }
         });
 });
 

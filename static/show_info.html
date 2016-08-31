@@ -3,6 +3,10 @@
 <p id="description">Description: {{ show_info["description"] }}</p>
 <p>
     <h3>Seasons</h3>
+    <div ng-show="isLoading">
+        <p>Please wait while your information is loading...</p>
+        <div><img src="{{ randomGif }}"></div>
+    </div>
     <ul ng-init="seasons_info">
         <li ng-repeat="season in seasons_info">
             Season {{ season["season_number"] }} 

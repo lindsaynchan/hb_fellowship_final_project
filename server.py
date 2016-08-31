@@ -53,7 +53,7 @@ def login_user():
     password = request.form.get("password")
 
     #get user from database
-    user = db.session.query(User).filter(User.email==email).first()
+    user = User.get_user_with_email(email)
 
     #if email and password match what's in the system, add user to the session and redirect to homepage
     if user:
@@ -101,9 +101,7 @@ def create_new_user():
     password = request.form.get("password")
 
     #run query to check if email is already in the database
-    user = db.session.query(User).filter(User.email==email).first()
-
-    # user = get_user_with_email(email)
+    user = User.get_user_with_email(email)
 
     #if it returns a row containing the email, redirect user to page again 
     if user:
@@ -112,9 +110,7 @@ def create_new_user():
     #else add the new user information to the table
     else:
         hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
-        user = User(email=email, password=hashed_password)
-        db.session.add(user)
-        db.session.commit()
+        user = User.add_user(email, hashed_password)
         return redirect("/login")
 
 
@@ -149,36 +145,31 @@ def series_information(guidebox_id):
     """Show page containing basic information about the series and where a user can watch the series online and on cable TV."""
 
     #query the database to check if the show's already there
-    show = Show.query.filter(Show.guidebox_id==guidebox_id).all()
+    show = Show.find_show_with_guidebox_id(guidebox_id)
 
     #if show is in database, pass jinja the show result
     if show:
-        show_info = show[0]
+        show_info = show
         print "Show in the database."
     else:
         #else, run API call to get show info
         show_info = guidebox_show_info(guidebox_id)
 
         #insert new show into table
-        show = Show(guidebox_id=show_info["id"],
-                    title=show_info["title"],
-                    artwork_urls=show_info["artwork_608x342"],
-                    first_aired=show_info["first_aired"],
-                    description=show_info["overview"])
-        db.session.add(show)
-        print "%s has been added to show table." % (show_info["title"])
-        db.session.commit()
-        print "Added show to database."
-        show_info = Show.query.filter(Show.guidebox_id==guidebox_id).all()
+        show = Show.add_show(show_info)
+        print "%s has been added to database." % (show_info["title"])
+        
+        show_info = Show.find_show_with_guidebox_id(guidebox_id)
+   
     if "current_user" in session:
         #find the current logged in user
-        user_email = session["current_user"]
+        email = session["current_user"]
 
         #use email to find the user_id
-        user_id = db.session.query(User.user_id).filter(User.email==user_email).all()
+        user_id = User.find_user_id_with_email(email)
 
         #check if user has favorited show already
-        favorite = Favorite.query.filter_by(guidebox_id=guidebox_id, user_id=user_id[0]).all()
+        favorite = Favorite.find_show_favorites_list(guidebox_id, user_id)
 
         #if user has favorited
         if favorite:
@@ -201,23 +192,23 @@ def get_show_information():
     guidebox_id = request.args.get("guidebox_id")
 
     #get the show from the database
-    show = Show.query.filter(Show.guidebox_id==guidebox_id).one()
+    show = Show.find_show_with_guidebox_id(guidebox_id)
 
     #check if show has a description, if it does then just pass the show on
     if show.description and show.network:
         print "\n\n\nShow description and network in database.\n\n\n"
     #if not, call API to get the show description, add description to show information in the database
+
     else:
         #API call to get the show information
         show_data = guidebox_show_info(guidebox_id)
+        
         #add show description to table
-        show.description = show_data["overview"]
-        show.network = show_data["network"]
-        db.session.commit()
+        Show.add_description_network_to_show(show, show_data)
         print "\n\n\nAdded show description and network to the database.\n\n\n"
-        #query and save updated show information to variable
+        
 
-    show_info = Show.query.filter(Show.guidebox_id==guidebox_id).one()
+    show_info = Show.find_show_with_guidebox_id(guidebox_id)
 
     return jsonify(show_info.as_dict())
 
@@ -254,12 +245,12 @@ def get_listing_information():
     guidebox_id = request.args.get("guidebox_id")
 
     #get the show from the database
-    show = Show.query.filter(Show.guidebox_id==guidebox_id).one()
+    show = Show.find_show_with_guidebox_id(guidebox_id)
 
     #get show title from Guidebox so it can be used in the OnConnect title search url 
     show_title = str(show.title)
 
-    #obtaining the OnConnect seriesId that will be used in the OnConnect series airings url
+    #get OnConnect seriesId
     series_id = onconnect_search_series_id(show_title)
 
     #obtaining listing information for a 24 hour period from the current time
@@ -281,23 +272,23 @@ def save_to_favorites_list():
     check_mark = "\xe2\x9c\x93"
 
     #find the current logged in user
-    user_email = session["current_user"]
+    email = session["current_user"]
 
     #use email to find the user_id
-    user_id = db.session.query(User.user_id).filter(User.email==user_email).one()
+    user_id = User.find_user_id_with_email(email)
+
     #if the show has not been favorited yet
     if check_mark not in button_content_encoded:
         #add row in favorites table
-        favorite = Favorite(guidebox_id=show_id, user_id=user_id)
-        db.session.add(favorite)
-        db.session.commit()
+        favorite = Favorite.add_to_favorites(show_id, user_id)
+
         #pass back the show_id and that the show has been favorited
         payload = {"show_id":show_id,"favorite":"True"}
         return jsonify(payload)
     else:
         #delete row in favorites table
-        Favorite.query.filter_by(guidebox_id=show_id).delete()
-        db.session.commit()
+        Favorite.delete_favorite(show_id)
+
         #pass back the show_id and that the show has been unfavorited
         payload = {"show_id":show_id,"favorite":"False"}
         return jsonify(payload)
@@ -310,7 +301,7 @@ def show_user():
     email = session["current_user"]
 
     #get user_id to get access to favorites table and users table
-    user = db.session.query(User).filter(User.email==email).first()
+    user = User.get_user_with_email(email)
 
     return render_template("user_profile.html", user=user)
 
@@ -322,7 +313,7 @@ def get_tv_listings():
     email = session["current_user"]
 
     #get user_id to get access to favorites table and users table
-    user = db.session.query(User).filter(User.email==email).first()
+    user = User.get_user_with_email(email)
 
     #use the backref relationship to find the titles of the user's favorite shows and save in a list
     favorite_titles = []
@@ -342,6 +333,7 @@ def get_tv_listings():
         #add show title to dictionary, add airings object to dictionary
         show["title"] = title_str
         show["listings"] = airings
+
         #add dictionary to the listings list
         listings.append(show)
         time.sleep(1)
@@ -361,7 +353,7 @@ def get_all_streaming_info():
     if email:
 
         #get user_id to get access to favorites table and users table
-        user = db.session.query(User).filter(User.email==email).first()
+        user = User.get_user_with_email(email)
 
         #use the backref relationship to find the titles of the user's favorite shows and save in a list
         guidebox_info = {}

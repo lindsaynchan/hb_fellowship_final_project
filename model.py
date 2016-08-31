@@ -26,16 +26,23 @@ class User(db.Model):
     def get_user_with_email(cls, email):
         """Search for user in database using given an email address."""
 
-        SELECT = "SELECT * FROM User WHERE email = :email"
-        user_search = db.session.execute(cls.SELECT, {'email':email})
-        user = cursor.fetchone()
-        # user = db.session.query(User).filter(User.email==email).first()
+        user = User.query.filter(User.email==email).first()
         return user
 
-    def add_user(self, email, password):
+    @classmethod
+    def add_user(cls, email, password):
+        """Add new user to the database."""
+
         user = User(email=email, password=password)
         db.session.add(user)
         db.session.commit()
+
+    @classmethod
+    def find_user_id_with_email(cls, email):
+        """Find user id using user's email."""
+
+        user_id = db.session.query(User.user_id).filter(User.email==email).one()
+        return user_id
 
 class Show(db.Model):
     """Creating TV shows table."""
@@ -61,8 +68,34 @@ class Show(db.Model):
     seasons = db.Column(db.String(20),
                         nullable=True)
 
-    def as_dict(self):
+    @classmethod
+    def find_show_with_guidebox_id(cls, guidebox_id):
+        """Find show using guidebox_id."""
 
+        show = Show.query.filter(Show.guidebox_id==guidebox_id).one()
+        return show
+
+    @classmethod
+    def add_show(cls, show_info):
+        """Add show to the database."""
+        show = Show(guidebox_id=show_info["id"],
+            title=show_info["title"],
+            artwork_urls=show_info["artwork_608x342"],
+            first_aired=show_info["first_aired"],
+            description=show_info["overview"])
+        db.session.add(show)
+        db.session.commit()
+
+    @classmethod
+    def add_description_network_to_show(cls, show, show_data):
+        """Add description and network to show in database."""
+
+        show.description = show_data["overview"]
+        show.network = show_data["network"]
+        db.session.commit()
+
+    def as_dict(self):
+        """Create dictionary for show information."""
         return {"show_id":self.show_id,"guidebox_id":self.guidebox_id,"title":self.title,"artwork_urls":self.artwork_urls,"first_aired":self.first_aired.year,"network":self.network,"description":self.description,"seasons":self.seasons}
 
 
@@ -84,6 +117,26 @@ class Favorite(db.Model):
     show = db.relationship("Show", backref="favorites")
     user = db.relationship("User", backref="favorites")
 
+    @classmethod
+    def find_show_favorites_list(cls, guidebox_id, user_id):
+        """Find show in favorites table."""
+        
+        favorite = Favorite.query.filter_by(guidebox_id=guidebox_id, user_id=user_id).all()
+        return favorite
+
+    @classmethod
+    def add_to_favorites(cls, guidebox_id, user_id):
+        """Add show to favorites table."""
+
+        favorite = Favorite(guidebox_id=guidebox_id, user_id=user_id)
+        db.session.add(favorite)
+        db.session.commit()
+
+    @classmethod
+    def delete_favorite(cls, guidebox_id):
+
+        Favorite.query.filter_by(guidebox_id=guidebox_id).delete()
+        db.session.commit()
 
 class Network(db.Model):
     """Creating networks table."""

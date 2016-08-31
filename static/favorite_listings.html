@@ -5,19 +5,24 @@
     </div>
 
     <ul>
-        <div ng-repeat="show in shows">
-            <b>{{ show.title }}</b>
-            <br>
-            <li ng-repeat="listing in show.listings">
-                {{ listing["program"]["title"] }}: {{ listing["program"]["episodeTitle"] }}
+        <div ng-if="listingsExist">
+            <div ng-repeat="show in shows">
+                <b>{{ show.title }}</b>
                 <br>
-                Season: {{ listing["program"]["seasonNum"] }}, Episode: {{ listing["program"]["episodeNum"] }}
+                <li ng-repeat="listing in show.listings">
+                    {{ listing["program"]["title"] }}: {{ listing["program"]["episodeTitle"] }}
+                    <br>
+                    Season: {{ listing["program"]["seasonNum"] }}, Episode: {{ listing["program"]["episodeNum"] }}
+                    <br>
+                    {{ listing["station"]["callSign"] }}
+                    <br>
+                    {{ listing["startTime"] }}
+                </li>
                 <br>
-                {{ listing["station"]["callSign"] }}
-                <br>
-                {{ listing["startTime"] }}
-            </li>
-            <br>
+            </div>
+        </div>
+        <div ng-if="listingsDoNotExist">
+            There are currently no available listings!
         </div>
     </ul>
 

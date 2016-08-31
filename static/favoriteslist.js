@@ -28,6 +28,12 @@ angular.module("favoritesListings", ['ngRoute'])
         .then(function(response) {
             $scope.isLoading = false;
             $scope.shows = response.data;
+            $scope.listingsExist = true;
+            $scope.listingsDoNotExist = false;
+            if (response.data.length <= 1) {
+                $scope.listingsExist = false;
+                $scope.listingsDoNotExist = true;
+            }
         });
 
     })
