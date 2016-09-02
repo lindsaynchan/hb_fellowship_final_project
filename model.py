@@ -2,6 +2,7 @@
 
 #importing SQLAlchemy from flask_sqlalchemy library
 from flask_sqlalchemy import SQLAlchemy
+import bcrypt
 
 #setting up our database
 db = SQLAlchemy()
@@ -78,6 +79,7 @@ class Show(db.Model):
     @classmethod
     def add_show(cls, show_info):
         """Add show to the database."""
+
         show = Show(guidebox_id=show_info["id"],
             title=show_info["title"],
             artwork_urls=show_info["artwork_608x342"],
@@ -96,6 +98,7 @@ class Show(db.Model):
 
     def as_dict(self):
         """Create dictionary for show information."""
+
         return {"show_id":self.show_id,"guidebox_id":self.guidebox_id,"title":self.title,"artwork_urls":self.artwork_urls,"first_aired":self.first_aired.year,"network":self.network,"description":self.description,"seasons":self.seasons}
 
 
@@ -210,12 +213,54 @@ class Streaming(db.Model):
 
 ##################################################################
 
+def example_data():
+    """Create some sample data for testing."""
 
-def connect_to_db(app):
+    # Empty out existing data if testing has run multiple times.
+    User.query.delete()
+    Show.query.delete()
+    Favorite.query.delete()
+
+    show1 = Show(guidebox_id='6959',
+            title=unicode('Game of Thrones'),
+            artwork_urls='http://static-api.guidebox.com/thumbnails_xlarge/6959-119520328-608x342.jpg',
+            description=unicode("Seven noble families fight for control of the mythical land of Westeros. Friction between the houses leads to full-scale war. All while a very ancient evil awakens in the farthest north. Amidst the war, a neglected military order of misfits, the Night's Watch, is all that stands between the realms of men and the icy horrors beyond."),
+            first_aired="2011-04-17")
+    show2 = Show(guidebox_id='8521',
+            title=unicode('Mad Men'),
+            artwork_urls='http://static-api.guidebox.com/091414/thumbnails_xlarge/8521-8744411319-608x342-show-thumbnail.jpg')
+    show3 = Show(guidebox_id='169',
+                title=unicode('Modern Family'),
+                artwork_urls='http://static-api.guidebox.com/091414/thumbnails_xlarge/169-6227865671-608x342-show-thumbnail.jpg')
+    show4 = Show(guidebox_id='67',
+                title=unicode('American Dad!'),
+                artwork_urls='http://static-api.guidebox.com/thumbnails_xlarge/67-1053925115-608x342.jpg',)
+
+    hashed_password = bcrypt.hashpw("hello", bcrypt.gensalt())
+    user1 = User(email="hello@hello.com", password=hashed_password)
+
+    favorite1 = Favorite(guidebox_id='67',
+                         user_id='1')
+    favorite2 = Favorite(guidebox_id='169',
+                         user_id='1')
+
+    db.session.add(show1)
+    db.session.add(show2)
+    db.session.add(show3)
+    db.session.add(show4)
+    db.session.add(user1)
+    db.session.add(favorite1)
+    db.session.add(favorite2)
+    db.session.commit()
+
+##################################################################
+
+
+def connect_to_db(app, db_uri="postgresql:///television"):
     """Connect the database to our Flask app."""
 
     # Configure to use our PostgreSQL database
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///television'
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.app = app
     db.init_app(app)

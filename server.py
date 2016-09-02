@@ -163,7 +163,7 @@ def series_information(guidebox_id):
    
     if "current_user" in session:
         #find the current logged in user
-        email = session["current_user"]
+        email = session.get("current_user")
 
         #use email to find the user_id
         user_id = User.find_user_id_with_email(email)
@@ -222,6 +222,11 @@ def get_seasons_information():
     #make API to get season information, gets back list of season information
     seasons_results = guidebox_season_info(guidebox_id)
 
+    for season in seasons_results:
+        date = season["first_airdate"]
+        year = str(date)[0:4]
+        season["first_airdate"] = year
+
     return jsonify(seasons_results)
 
 
@@ -272,7 +277,7 @@ def save_to_favorites_list():
     check_mark = "\xe2\x9c\x93"
 
     #find the current logged in user
-    email = session["current_user"]
+    email = session.get("current_user")
 
     #use email to find the user_id
     user_id = User.find_user_id_with_email(email)
@@ -298,19 +303,23 @@ def show_user():
     """Show user's profile."""
 
     #get user email from session
-    email = session["current_user"]
+    email = session.get("current_user")
 
-    #get user_id to get access to favorites table and users table
-    user = User.get_user_with_email(email)
+    if email:
+        #get user_id to get access to favorites table and users table
+        user = User.get_user_with_email(email)
 
-    return render_template("user_profile.html", user=user)
+        return render_template("user_profile.html", user=user)
+    else:
+        flash("You need to be logged in to see that page.")
+        return redirect("/login")
 
 @app.route('/get_tv_listings')
 def get_tv_listings():
     """Get TV Listings for shows on favorite's list."""
 
     #get user email from session
-    email = session["current_user"]
+    email = session.get("current_user")
 
     #get user_id to get access to favorites table and users table
     user = User.get_user_with_email(email)
@@ -332,7 +341,10 @@ def get_tv_listings():
         airings = onconnect_search_airings(series_id)
         #add show title to dictionary, add airings object to dictionary
         show["title"] = title_str
-        show["listings"] = airings
+        if airings:
+            show["listings"] = airings
+        else:
+            show["listings"] = ["empty"]
 
         #add dictionary to the listings list
         listings.append(show)
@@ -368,7 +380,10 @@ def get_all_streaming_info():
             #add show title to dictionary, add airings object to dictionary
             show["id"] = guidebox_id
             show["title"] = guidebox_info[guidebox_id]
-            show["streaming"] = streaming_sources
+            if streaming_sources:
+                show["streaming"] = streaming_sources
+            else:
+                show["streaming"] = ["empty"]
             #add dictionary to the listings list
             streaming_info.append(show)
 

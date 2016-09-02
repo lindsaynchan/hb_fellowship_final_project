@@ -28,14 +28,26 @@ angular.module("favoritesListings", ['ngRoute'])
         .then(function(response) {
             $scope.isLoading = false;
             $scope.shows = response.data;
-            $scope.listingsExist = true;
             $scope.listingsDoNotExist = false;
-            if (response.data.length <= 1) {
-                $scope.listingsExist = false;
-                $scope.listingsDoNotExist = true;
-            }
         });
 
+        $scope.thereAreNoListingsAvailable = function (listings) {
+            if (listings[0] === "empty") {
+                return true;
+            }
+            else {
+                return false;
+            }
+        };
+
+        $scope.thereAreListingsAvailable = function (listings) {
+            if (listings[0] === "empty") {
+                return false;
+            }
+            else {
+                return true;
+            }
+        };
     })
 
     .controller('StreamingsController', function ($scope, $http) {
@@ -51,6 +63,24 @@ angular.module("favoritesListings", ['ngRoute'])
             $scope.isLoading = false;
             $scope.streaming = response.data;
         });
+
+        $scope.thereAreNoAvailableStreaming = function (streaming) {
+            if (streaming[0] === "empty") {
+                return true;
+            }
+            else {
+                return false;
+            }
+        };
+
+        $scope.thereAreAvailableStreaming = function (streaming) {
+            if (streaming[0] === "empty") {
+                return false;
+            }
+            else {
+                return true;
+            }
+        };
 
 });
 

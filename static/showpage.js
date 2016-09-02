@@ -33,6 +33,7 @@ angular.module("showInformation", ['ngRoute'])
 
         $http.get("/show_info?guidebox_id=" + guidebox_id)
         .then(function(response) {
+            $scope.isLoading = false;
             $scope.show_info = response.data;
         });
         console.log($scope.show_info);
@@ -74,13 +75,12 @@ angular.module("showInformation", ['ngRoute'])
             $scope.listings = response.data;
             $scope.listingsExist = true;
             $scope.listingsDoNotExist = false;
-            if (response.data.length < 1) {
+            if (response.data.length <= 1) {
                 $scope.listingsExist = false;
                 $scope.listingsDoNotExist = true;
             }
         });
 });
-
 
 
 

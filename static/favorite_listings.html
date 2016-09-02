@@ -5,10 +5,12 @@
     </div>
 
     <ul>
-        <div ng-if="listingsExist">
-            <div ng-repeat="show in shows">
-                <b>{{ show.title }}</b>
-                <br>
+        <div ng-repeat="show in shows">
+            <b>{{ show.title }}</b>
+            <br>
+            <br>
+            <div>
+            <div ng-if="thereAreListingsAvailable(show.listings)">
                 <li ng-repeat="listing in show.listings">
                     {{ listing["program"]["title"] }}: {{ listing["program"]["episodeTitle"] }}
                     <br>
@@ -18,11 +20,12 @@
                     <br>
                     {{ listing["startTime"] }}
                 </li>
-                <br>
             </div>
-        </div>
-        <div ng-if="listingsDoNotExist">
-            There are currently no available listings!
+            <div ng-if="thereAreNoListingsAvailable(show.listings)">
+                Sorry, there are currently no available listings.
+            </div>
+            <br>
+            <br>
         </div>
     </ul>
 

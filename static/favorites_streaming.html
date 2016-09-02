@@ -8,9 +8,14 @@
             <b>{{ show.title }}</b>
             <br>
             <br>
-            <li ng-repeat="source in show.streaming">
-                {{ source["display_name"] }}
-            </li>
+            <div ng-if="thereAreAvailableStreaming(show.streaming)">
+                <li ng-repeat="source in show.streaming">
+                    {{ source["display_name"] }}
+                </li>
+            </div>
+            <div ng-if="thereAreNoAvailableStreaming(show.streaming)">
+                Sorry, there are currently no available streaming sources.
+            </div>
             <br>
             <br>
         </div>
