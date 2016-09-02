@@ -271,6 +271,7 @@ def save_to_favorites_list():
     show_id = str(request.form.get("id"))
     #get button content from the event handler/post request
     button_content = request.form.get("button_content")
+
     button_content_encoded = button_content.encode('utf-8')
 
     #save utf-8 encoded checkmark as a string variable
@@ -279,24 +280,29 @@ def save_to_favorites_list():
     #find the current logged in user
     email = session.get("current_user")
 
-    #use email to find the user_id
-    user_id = User.find_user_id_with_email(email)
+    if email:
 
-    #if the show has not been favorited yet
-    if check_mark not in button_content_encoded:
-        #add row in favorites table
-        favorite = Favorite.add_to_favorites(show_id, user_id)
+        #use email to find the user_id
+        user_id = User.find_user_id_with_email(email)
 
-        #pass back the show_id and that the show has been favorited
-        payload = {"show_id":show_id,"favorite":"True"}
-        return jsonify(payload)
+        #if the show has not been favorited yet
+        if check_mark not in button_content_encoded:
+            #add row in favorites table
+            favorite = Favorite.add_to_favorites(show_id, user_id)
+
+            #pass back the show_id and that the show has been favorited
+            payload = {"show_id":show_id,"favorite":"True"}
+            return jsonify(payload)
+        else:
+            #delete row in favorites table
+            Favorite.delete_favorite(show_id)
+
+            #pass back the show_id and that the show has been unfavorited
+            payload = {"show_id":show_id,"favorite":"False"}
+            return jsonify(payload)
     else:
-        #delete row in favorites table
-        Favorite.delete_favorite(show_id)
-
-        #pass back the show_id and that the show has been unfavorited
-        payload = {"show_id":show_id,"favorite":"False"}
-        return jsonify(payload)
+        flash("You need to be logged in to see that page.")
+        return redirect("/login")
 
 @app.route('/user-profile')
 def show_user():
@@ -321,39 +327,44 @@ def get_tv_listings():
     #get user email from session
     email = session.get("current_user")
 
-    #get user_id to get access to favorites table and users table
-    user = User.get_user_with_email(email)
+    if email: 
+        #get user_id to get access to favorites table and users table
+        user = User.get_user_with_email(email)
 
-    #use the backref relationship to find the titles of the user's favorite shows and save in a list
-    favorite_titles = []
-    for favorite in user.favorites:
-        favorite_titles.append(favorite.show.title)
+        #use the backref relationship to find the titles of the user's favorite shows and save in a list
+        favorite_titles = []
+        for favorite in user.favorites:
+            favorite_titles.append(favorite.show.title)
 
-    #create list that will contain dictionaries with show title and a list of dictionaries regarding tv listings
-    listings = []
+        #create list that will contain dictionaries with show title and a list of dictionaries regarding tv listings
+        listings = []
 
-    for title in favorite_titles:
-        show = {}
-        #convert title from unicode to string to run API call
-        title_str = str(title)
-        series_id = onconnect_search_series_id(title_str)
-        print "\n\n", series_id, "\n\n"
-        airings = onconnect_search_airings(series_id)
-        #add show title to dictionary, add airings object to dictionary
-        show["title"] = title_str
-        if airings:
-            show["listings"] = airings
-        else:
-            show["listings"] = ["empty"]
+        for title in favorite_titles:
+            show = {}
+            #convert title from unicode to string to run API call
+            title_str = str(title)
+            series_id = onconnect_search_series_id(title_str)
+            print "\n\n", series_id, "\n\n"
+            airings = onconnect_search_airings(series_id)
+            #add show title to dictionary, add airings object to dictionary
+            show["title"] = title_str
+            if airings:
+                show["listings"] = airings
+            else:
+                show["listings"] = ["empty"]
 
-        #add dictionary to the listings list
-        listings.append(show)
-        time.sleep(1)
+            #add dictionary to the listings list
+            listings.append(show)
+            time.sleep(1)
 
-    
-    listings = jsonify(listings)
+        
+        listings = jsonify(listings)
 
-    return listings
+        return listings
+
+    else:
+        flash("Please login first!")
+        return redirect('/login')        
 
 @app.route('/all_streaming')
 def get_all_streaming_info():

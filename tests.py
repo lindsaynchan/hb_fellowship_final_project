@@ -249,12 +249,12 @@ class FlaskTestsDatabase(TestCase):
         result = self.client.get("/show/169")
         self.assertIn("Modern Family", result.data)
 
-    def test_show_info(self):
-        """Test show info section on show page."""
+    # def test_show_info(self):
+    #     """Test show info section on show page."""
 
-        result = self.client.get("/show/169/show_info")
-        self.assertIn("Network", result.data)
-        self.assertIn("Seasons", result.data)
+    #     result = self.client.get("/show/169/show_info")
+    #     self.assertIn("Network", result.data)
+    #     self.assertIn("Seasons", result.data)
 
 class FlaskTestsLoggedIn(TestCase):
     """Flask tests with user logged in to session."""
@@ -299,7 +299,88 @@ class FlaskTestsLoggedIn(TestCase):
         self.assertIn("Modern Family", result.data)
         self.assertIn("Favorite", result.data)
 
+    def test_show_user_profile(self):
+        """Test if user profile will render."""
 
+        result = self.client.get('/user-profile')
+        self.assertIn("User Profile", result.data)
+
+    def test_save_to_favorites(self):
+        """Test if favorited show is saved in database."""
+
+        result = self.client.post('/save_to_favorites',
+                                  data={"id":"8521","button_content":"Favorite"})
+        favorite = Favorite.query.filter(Favorite.guidebox_id=="8521").one()
+        self.assertIn("8521", favorite.guidebox_id)
+
+    def test_remove_from_favorites(self):
+        """Test if favorited show is removed in database."""
+
+        result = self.client.post('/save_to_favorites',
+                                  data={"id":"8521","button_content":u'\n    \n    \u2713 \n    \n    Favorite'})
+        favorites = Favorite.query.filter(Favorite.user_id=="1").all()
+        favorite_ids = []
+        for favorite in favorites:
+            favorite_ids.append(favorite.guidebox_id)
+
+        self.assertNotIn("8521", favorite_ids)
+
+class FlaskTestsNotLoggedIn(TestCase):
+    """Flask tests with user logged in to session."""
+
+    def setUp(self):
+        """Set up before every test."""
+
+        app.config['TESTING'] = True
+        app.config['SECRET_KEY'] = 'key'
+        self.client = app.test_client()
+
+        connect_to_db(app, "postgresql:///testdb")
+        db.create_all()
+        example_data()
+
+    def tearDown(self):
+        """Tear down after every test."""
+
+        db.session.close()
+        db.drop_all()
+
+    def test_homepage_not_logged_in(self):
+        """Test homepage buttons are correct if user is not logged in."""
+
+        result = self.client.get("/")
+        self.assertNotIn("Profile",result.data)
+
+    # def test_favorites_button_on_show_page(self):
+    #     """Test if favorites button is not located on show page while not logged in."""
+
+    #     result = self.client.get("/show/169")
+    #     self.assertIn("Modern Family", result.data)
+    #     self.assertTrue("if favorited", result.data)
+
+    def test_no_user_profile(self):
+        """Test user profile will not render if user is not logged in."""
+
+        result = self.client.get('/user-profile', follow_redirects=True)
+        self.assertIn("You need to be logged", result.data)
+
+    def test_not_save_to_favorites(self):
+        """Test favorited show will not be saved in database."""
+
+        result = self.client.post('/save_to_favorites',
+                                  data={"id":"8521","button_content":"Favorite"},
+                                  follow_redirects=True)
+
+        self.assertIn("You need to be logged", result.data)
+
+    def test_remove_from_favorites(self):
+        """Test if favorited show is removed in database."""
+
+        result = self.client.post('/save_to_favorites',
+                                  data={"id":"8521","button_content":u'\n    \n    \u2713 \n    \n    Favorite'},
+                                  follow_redirects=True)
+        self.assertIn("You need to be logged", result.data)
+        
 ####################################################################
 
 if __name__ == '__main__':
