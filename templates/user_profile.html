@@ -3,45 +3,73 @@
 {% block title %}User Profile{% endblock %}
 {% block header %}
 <script src="/static/favoriteslist.js"></script>
+<style>
+    body {
+        background: rgba(234, 126, 172, .9);
+        background-image: url("/static/background.png");
+        background-size: 50%;
+        background-repeat: repeat-y repeat-x;
+    }
+
+    .navbar-angular {
+        padding: 0;
+    }
+</style>
+{% endblock %}
+{% block navbar %}
+
+    <form class="navbar-form navbar-right" role="search" action="/search-results" id="search_input">
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="Search" name="search">
+        </div>
+        <button type="submit" class="btn btn-default"> 
+            <span class="glyphicon glyphicon-search" aria-hidden="true"></span>  Search!
+        </button>
+    </form>
+
 {% endblock %}
 {% block content %}
 
-<p>Email: {{ session["current_user"] }}</p>
+<div class="col-xs-10 col-xs-offset-1 white-box">
+    <div class="col-xs-4 favorites-list">
+        <div class="emailaddress">
+            <h3>Email: </h3>
+            {{ session["current_user"] }}
+        </div>
+        <br><br>
+        <h3>Favorite's List:</h3>
+        {% if user.favorites %}
+            <ul>
+            {% for favorite in user.favorites %}
 
-<h3>Favorite's List</h3>
-{% if user.favorites %}
-    <ul>
-    {% for favorite in user.favorites %}
+                <li><a href="/show/{{ favorite.show.guidebox_id }}">{{ favorite.show.title }}</a></li>
 
-        <li><a href="/show/{{ favorite.show.guidebox_id }}">{{ favorite.show.title }}</a></li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>You don't have any favorited shows yet!</p>
+        {% endif %}
+    </div>
+    <div class="col-xs-8 angular-favorites">
+        {% raw %}
+        <div ng-app="favoritesListings">
+            <ul class="nav navbar-nav">
+                <li><a href="#/all_favorites_listings">TV Listings</a></li>
+                <li><a href="#/all_streaming">Online</a></li>
+            </ul>
+            <div class="container">
+                <div class="row">
+                    <div class="col-xs-12">
 
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>You don't have any favorited shows yet!</p>
-{% endif %}
-<br><br>
+                        <div ng-view></div>
 
-<h4>Find your favorite shows!</h4>
-
-{% raw %}
-<div ng-app="favoritesListings">
-    <ul class="nav navbar-nav">
-        <li><a href="#/all_favorites_listings">TV Listings</a></li>
-        <li><a href="#/all_streaming">Online</a></li>
-    </ul>
-    <div class="container">
-        <div class="row">
-            <div class="col-xs-12">
-
-                <div ng-view></div>
-
+                    </div>
+                </div>
             </div>
         </div>
+        {% endraw %}
     </div>
 </div>
-{% endraw %}
-
 {% endblock %}
 
 

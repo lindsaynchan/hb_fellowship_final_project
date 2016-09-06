@@ -1,21 +1,51 @@
 {% extends 'base.html' %}
-
+{% block header %}
+<style>
+    body {
+        background: rgba(31, 107, 91, .9);
+        background-image: url("/static/background.png");
+        background-size: 50%;
+        background-repeat: repeat-y repeat-x;
+    }
+</style>
+{% endblock %}
 {% block title %}Search{% endblock %}
 
-{% block content %}
+{% block navbar %}
 
+    <form class="navbar-form navbar-right" role="search" action="/search-results" id="search_input">
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="Search" name="search">
+        </div>
+        <button type="submit" class="btn btn-default"> 
+            <span class="glyphicon glyphicon-search" aria-hidden="true"></span>  Search!
+        </button>
+    </form>
+
+{% endblock %}
+
+{% block content %}
 <br><br>
     {% if results %}
         {% for result in results %}
-            <ul>
-                <li><a href="/show/{{ result["id"] }}">{{ result["title"] }}</a>
+            <div class="col-xs-4 results thumbnail">
+                <center>
+                    <img src="{{ result["artwork_304x171"] }}">
+                    <br><br>
+                    <a href="/show/{{ result["id"] }}">{{ result["title"] }}</a>
                     {% if result["first_aired"] %}
                         ({{ result["first_aired"][0:4] }})
-                     {% endif %}</li>
-            </ul>        
+                    {% endif %}</td>
+                </center>
+             </div>        
         {% endfor %}
     {% else %}
-        <p>Sorry, there's nothing that matches your search!</p>
+        <center>
+            <div class="white-box col-xs-6 col-xs-offset-3">
+                    <h3>Sorry, there's nothing that matches your search!</h3>
+            </div>
+        </center>
     {% endif %}
-
 {% endblock %}
+
+

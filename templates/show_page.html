@@ -2,43 +2,73 @@
 {% block title %}Series!{% endblock %}
 {% block header %}
 <script src="/static/showpage.js"></script>
+<style>
+    body {
+        background: rgba(255, 77, 75, .9);
+        background-image: url("/static/background.png");
+        background-size: 50%;
+        background-repeat: repeat-y repeat-x;
+    }
+
+    .navbar-angular {
+        padding: 0;
+    }
+</style>
 {% endblock %}
+{% block navbar %}
+
+    <form class="navbar-form navbar-right" role="search" action="/search-results" id="search_input">
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="Search" name="search">
+        </div>
+        <button type="submit" class="btn btn-default"> 
+            <span class="glyphicon glyphicon-search" aria-hidden="true"></span>  Search!
+        </button>
+    </form>
+
+{% endblock %}
+
 {% block content %}
+<div class="col-xs-10 col-xs-offset-1 white-box">
+    <div class="title col-xs-12">
+        <h1>{{ show_info["title"] }}</h1>
+    </div>
+    <div class="col-xs-3 image-favorite">
+        <br>
+        <div><img src="{{ show_info["artwork_urls"] }}" width="300"></div>
+        <br><br>
+        {% if "current_user" in session %}
+            <button type="button" class="btn btn-default favorite-btn" id="{{ show_info["guidebox_id"] }}">
+                {% if favorited %}
+                &#10003; 
+                {% endif %}
+                Favorite</button>
+        {% endif %}
+    </div>
 
-<h1>{{ show_info["title"] }}</h1>
 
-<div><img src="{{ show_info["artwork_urls"] }}"></div>
+    <div class="col-xs-7 col-xs-offset-1 angular-show">
+        <script>var guidebox_id={{ show_info["guidebox_id"] }};</script>
+        {% raw %}
+        <div ng-app="showInformation">
+            <ul class="nav navbar-nav navbar-angular">
+                <li><a href="#/show_info">Info</a></li>
+                <li><a href="#/streaming">Streaming</a></li>
+                <li><a href="#/tv_listing">TV Listings</a></li>
+            </ul>
+            <div class="container col-xs-12 ang-show-info">
+                <div class="row">
+                    <div class="col-xs-12 information">
 
-<br><br>
+                        <div ng-view></div>
 
-{% if "current_user" in session %}
-<button class="favorite-btn" id="{{ show_info["guidebox_id"] }}">
-    {% if favorited %}
-    &#10003; 
-    {% endif %}
-    Favorite</button>
-{% endif %}
-
-<br><br>
-<script>var guidebox_id={{ show_info["guidebox_id"] }};</script>
-{% raw %}
-<div ng-app="showInformation">
-    <ul class="nav navbar-nav">
-        <li><a href="#/show_info">Info</a></li>
-        <li><a href="#/streaming">Streaming</a></li>
-        <li><a href="#/tv_listing">TV Listings</a></li>
-    </ul>
-    <div class="container">
-        <div class="row">
-            <div class="col-xs-12">
-
-                <div ng-view></div>
-
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+    {% endraw %}
 </div>
-{% endraw %}
 <script>
 
     //when the favorite button is clicked, submit post request to add/delete from favorites table

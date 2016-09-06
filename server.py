@@ -136,7 +136,7 @@ def show_results():
         results = guidebox_search_title(encoded_search)
     else:
         results = []
-
+        
     return render_template("search_results.html", results=results)
 
 
@@ -144,6 +144,7 @@ def show_results():
 def series_information(guidebox_id):
     """Show page containing basic information about the series and where a user can watch the series online and on cable TV."""
 
+    
     #query the database to check if the show's already there
     show = Show.find_show_with_guidebox_id(guidebox_id)
 

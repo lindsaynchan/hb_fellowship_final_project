@@ -221,19 +221,26 @@ def example_data():
     Show.query.delete()
     Favorite.query.delete()
 
+    game_of_thrones = unicode('Game of Thrones', "utf-8")
+    game_of_thrones_description = unicode("Seven noble families fight for control of the mythical land of Westeros. Friction between the houses leads to full-scale war. All while a very ancient evil awakens in the farthest north. Amidst the war, a neglected military order of misfits, the Night's Watch, is all that stands between the realms of men and the icy horrors beyond.", "utf-8")
+
+    mad_men = unicode('Mad Men', "utf-8")
+    modern_family = unicode('Modern Family', "utf-8")
+    american_dad = unicode('American Dad', "utf-8")
+
     show1 = Show(guidebox_id='6959',
-            title=unicode('Game of Thrones'),
+            title=unicode(game_of_thrones),
             artwork_urls='http://static-api.guidebox.com/thumbnails_xlarge/6959-119520328-608x342.jpg',
-            description=unicode("Seven noble families fight for control of the mythical land of Westeros. Friction between the houses leads to full-scale war. All while a very ancient evil awakens in the farthest north. Amidst the war, a neglected military order of misfits, the Night's Watch, is all that stands between the realms of men and the icy horrors beyond."),
+            description=unicode(game_of_thrones_description),
             first_aired="2011-04-17")
     show2 = Show(guidebox_id='8521',
-            title=unicode('Mad Men'),
+            title=unicode(mad_men),
             artwork_urls='http://static-api.guidebox.com/091414/thumbnails_xlarge/8521-8744411319-608x342-show-thumbnail.jpg')
     show3 = Show(guidebox_id='169',
-                title=unicode('Modern Family'),
+                title=unicode(modern_family),
                 artwork_urls='http://static-api.guidebox.com/091414/thumbnails_xlarge/169-6227865671-608x342-show-thumbnail.jpg')
     show4 = Show(guidebox_id='67',
-                title=unicode('American Dad!'),
+                title=unicode(american_dad),
                 artwork_urls='http://static-api.guidebox.com/thumbnails_xlarge/67-1053925115-608x342.jpg',)
 
     hashed_password = bcrypt.hashpw("hello", bcrypt.gensalt())

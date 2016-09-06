@@ -4,13 +4,26 @@
 {% block navbar %}
 {% endblock %}
 {% block content %}
-<h3>Find your favorite show!</h3>
-<form action="/search-results" id="search_input">
-    <input type="text" name="search">
-    <br>
-    <input type="submit" value="Search!">
-</form>
-
+<br><br><br><br><br>
+<div class="box container-fluid">
+    <div class="col-xs-12 text-center header">
+        <h1>Find your favorite show!</h1>
+    </div>
+    <br><br>
+    <div class="col-xs-12">
+        <form action="/search-results" class="form-actions" id="search_input">
+            <div class="col-xs-6 col-xs-offset-3">
+                <input type="text" class="form-control" name="search" placeholder="Series Title">
+            </div>
+            <br><br>
+            <div class="buttonHolder">
+                <button type="submit" class="btn btn-default"> 
+                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span>  Search!
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
 
 

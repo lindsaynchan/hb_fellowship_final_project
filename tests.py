@@ -45,6 +45,12 @@ class BasicFlaskTests(TestCase):
         result = self.client.get('/new-user')
         self.assertIn("New User", result.data)
 
+    def test_generate_random_gif(self):
+        """Test giphy generator route."""
+
+        result = self.client.get('/get_random_gif')
+        self.assertEqual(result.status_code, 200)
+
 class TestsUserClassMethodsDatabase(TestCase):
     """Tests the user class methods that use the database."""
 
@@ -119,19 +125,20 @@ class TestsShowClassMethodsDatabase(TestCase):
 
 
         Show.add_show(show_info)
-        show = Show.query.filter(Show.title=="Friends").one()
-        self.assertEqual("Friends", show.title)
+        show = Show.query.filter(Show.title==unicode("Friends","utf-8")).one()
+        self.assertEqual(unicode("Friends","utf-8"), show.title)
 
     def test_add_description_network_to_show(self):
         """Test adding description and network to a show in the database."""
 
         description = unicode("Seven noble families fight for control of the mythical land of Westeros.","utf-8")
-        show = Show.query.filter(Show.title=="Game of Thrones").one()
+        show = Show.query.filter(Show.title==unicode("Game of Thrones","utf-8")).one()
         show_data = {"overview":description,"network":"HBO"}
 
         Show.add_description_network_to_show(show, show_data)
-        show = Show.query.filter(Show.title=="Game of Thrones").one()
-        self.assertEqual("HBO", show.network)
+        show = Show.query.filter(Show.guidebox_id=="6959").one()
+
+        self.assertIn(unicode("Seven noble","utf-8"), show.description)
 
     def test_as_dict(self):
         """Test dictionary conversion."""
@@ -351,12 +358,12 @@ class FlaskTestsNotLoggedIn(TestCase):
         result = self.client.get("/")
         self.assertNotIn("Profile",result.data)
 
-    # def test_favorites_button_on_show_page(self):
-    #     """Test if favorites button is not located on show page while not logged in."""
+    def test_favorites_button_on_show_page(self):
+        """Test if favorites button is not located on show page while not logged in."""
 
-    #     result = self.client.get("/show/169")
-    #     self.assertIn("Modern Family", result.data)
-    #     self.assertTrue("if favorited", result.data)
+        result = self.client.get("/show/169")
+        self.assertIn("Modern Family", result.data)
+        self.assertNotIn("<button class='favorite-btn'", result.data)
 
     def test_no_user_profile(self):
         """Test user profile will not render if user is not logged in."""
@@ -380,7 +387,9 @@ class FlaskTestsNotLoggedIn(TestCase):
                                   data={"id":"8521","button_content":u'\n    \n    \u2713 \n    \n    Favorite'},
                                   follow_redirects=True)
         self.assertIn("You need to be logged", result.data)
-        
+
+
+
 ####################################################################
 
 if __name__ == '__main__':
