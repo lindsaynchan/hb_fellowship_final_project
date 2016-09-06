@@ -76,7 +76,7 @@ On the homepage, or from any page in the application, users can look up their fa
 
 Once a user selects a series title from the search results displayed, a show page that is partially built using Angular will render. 
 
-![Alt text][/static/showpage.png]
+![alt text](/static/showpage.png)
 
 The information on the lefthand side was pulled from a database query. The information on the righthand side is broken up into 3 tabs. Since the data on this page is rendered using 5 APIs and had a long load time originally, the author decided to break up the API calls with the Angular framework. Maintaining the single, page html feel, each tab makes an AJAX call to create a database query and or create an API call to get the series information. The first tab contains information regarding the series information. The second tab contains information regarding where a series can be found online. The third tab contains information regarding where a series can be found on cable television.
 

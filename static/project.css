@@ -97,6 +97,11 @@ input {
     text-decoration: underline;
 }
 
+#show-tabs {
+    padding-left: 5px;
+    font-size: 24px;
+}
+
 .information {
     padding-top: 15px;
     font-family: Roboto, sans-serif;
@@ -122,6 +127,14 @@ input {
     font-size: 16px;
 }
 
+#favorites-ls-st {
+    padding-left: 0;
+    font-size: 24px;
+    color: #333;
+    text-decoration: underline;
+    font-style: bold;
+}
+
 .angular-favorites {
     padding-left: 75px;
     padding-top: 10px;
@@ -132,8 +145,6 @@ input {
 .angular-favorites li a {
     color: #333;
     text-decoration: underline;
-    font-size: 18px;
-    font-style: bold;
 }
 
 .emailaddress {
