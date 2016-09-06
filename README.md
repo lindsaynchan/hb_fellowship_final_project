@@ -86,7 +86,7 @@ If a user is logged in, a favorite's button will populate on a series' page. If 
 
 If a user goes to their individual profile, they can view the list of their favorited series. Also, the user can access streaming and cable listing information regarding their favorite shows on their profile page as well. 
 
-___
+
 ___
 
 # Author
