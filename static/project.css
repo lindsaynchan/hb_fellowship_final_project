@@ -62,7 +62,7 @@ div.box {
     padding-right: 30px;
     padding-left: 30px;
     border-radius: 5px;
-    margin-top: 40px;
+    margin-top: 20px;
 }
 
 button {
@@ -213,4 +213,16 @@ h3 {
 
 .signup-button {
     padding-bottom: 60px;
+}
+
+footer {
+    position: fixed;
+    right: 0;
+    left: 0;
+    height: 30px;
+    width: 100%;
+    margin-top: 80px;
+    text-align: center;
+    font-family: Roboto, sans-serif;
+    font-size: 12px;
 }
