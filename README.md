@@ -68,11 +68,11 @@ ___
 
 Search Feature
 
-![Alt text][/static/homepage.png]
+![alt text](/static/homepage.png)
 
 On the homepage, or from any page in the application, users can look up their favorite series using the application's search function. The search input will be encoded and used to help create an API call to Guidebox. The API call will return a list of up to 50 results at most that are exact or fuzzy matches to the original search input. 
 
-![Alt text][/static/searchresults.png]
+![alt text](/static/searchresults.png)
 
 Once a user selects a series title from the search results displayed, a show page that is partially built using Angular will render. 
 
@@ -82,7 +82,7 @@ The information on the lefthand side was pulled from a database query. The infor
 
 If a user is logged in, a favorite's button will populate on a series' page. If a user clicks on this button, an AJAX call is made to the database, and the server will evaluate whether the user would like to add or remove the series from their favorite's list.
 
-![Alt text][/static/userprofile.png]
+![alt text](/static/userprofile.png)
 
 If a user goes to their individual profile, they can view the list of their favorited series. Also, the user can access streaming and cable listing information regarding their favorite shows on their profile page as well. 
 
