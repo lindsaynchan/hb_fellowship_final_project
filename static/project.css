@@ -40,6 +40,9 @@ body {
     font-style: bold;
 }
 
+#homepage-text {
+    padding-bottom: 20px;
+}
 
 h1 {
     font-family: Roboto, sans-serif;
@@ -104,6 +107,7 @@ input {
 
 .information {
     padding-top: 15px;
+    padding-bottom: 15px;
     font-family: Roboto, sans-serif;
     font-size: 16px;
 }
@@ -113,7 +117,8 @@ input {
 }
 
 .image-favorite {
-    padding-left: 50px
+    padding-left: 50px;
+    padding-bottom: 30px;
 }
 
 .favorites-list {
@@ -137,7 +142,7 @@ input {
 
 .angular-favorites {
     padding-left: 75px;
-    padding-top: 10px;
+    padding-top: 5px;
     padding-bottom: 40px;
     font-size: 16px;
 }
