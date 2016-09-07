@@ -13,6 +13,10 @@
     height: 100%;
 }
 
+.navbar {
+    border-radius: 0;
+}
+
 .navbar-nav {
     vertical-align: center;
     padding: 20px;
@@ -77,12 +81,21 @@ input {
     text-align: center;
 }
 
-.results {
-    padding: 20px;
-}
+/*.results {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}*/
 
 .thumbnail {
     background-color: rgba(255,250,250,.9);
+    padding-top: 15px;
+    padding-bottom: 15px;
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.row {
+
 }
 
 .angular-show {
@@ -160,7 +173,8 @@ input {
     background-color: rgba(255,250,250,.9);
     padding-top: 15px;
     padding-bottom: 15px;
-    margin-top: 50px;
+    margin-top: 20px;
+    margin-bottom: 60px;
     border-radius: 5px;
 }
 

@@ -14,7 +14,7 @@ def onconnect_search_series_id(show_name):
     name = show_name.replace(" ", "+")
 
     #format OnConnect url
-    url = "http://data.tmsapi.com/v1.1/programs/search?limit=50&q=" + name + "&entityType=series&api_key=" + ONCONNECT_API_KEY
+    url = "http://data.tmsapi.com/v1.1/programs/search?limit=15&q=" + name + "&entityType=series&api_key=" + ONCONNECT_API_KEY
 
     #submit API request
     show_search_response = requests.get(url)
